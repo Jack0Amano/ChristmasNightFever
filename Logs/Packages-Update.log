@@ -43,3 +43,21 @@ The following packages were updated:
   com.unity.render-pipelines.universal from version 14.0.3 to 14.0.9
   com.unity.timeline from version 1.7.1 to 1.7.6
   com.unity.visualscripting from version 1.7.8 to 1.9.1
+
+=== Wed Dec  4 16:08:26 2024
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.cinemachine from version 2.7.8 to 2.9.5
+  com.unity.postprocessing from version 3.0.3 to 3.2.2
+  com.unity.textmeshpro from version 2.1.4 to 3.0.6
+
+=== Wed Dec  4 16:08:26 2024
+
+Packages were changed.
+Update Mode: mergeDefaultDependencies
+
+The following packages were added:
+  com.unity.postprocessing@3.2.2

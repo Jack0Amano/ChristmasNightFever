@@ -11,16 +11,28 @@ namespace StageObjects
 
     public class CheckPoint : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
+        [Tooltip("チェックポイントの種類を設定する")]
+        [SerializeField] internal CheckPointType checkPointType;
+
+        [Tooltip("チェックポイントのIDを設定する イベントなどで使われる")]
+        [SerializeField] internal int checkPointID;
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
         {
-
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, 0.3f);
         }
+#endif
+    }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+    /// <summary>
+    /// チェックポイントがどの様な動きをするものか
+    /// </summary>
+    [SerializeField] internal enum CheckPointType
+    {
+        Goal,
+        Event,
+        PlayerSpawn,
     }
 }

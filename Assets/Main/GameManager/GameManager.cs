@@ -5,8 +5,10 @@ using UnityEngine.AddressableAssets;
 using StageObjects;
 using MainUI;
 using Units;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using static Utility;
 
-public class GameManager : SingletonMonoBehaviour<GameManager>
+public class GameManager : MonoBehaviour
 {
     [Tooltip("MainUIControllerを設定する")]
     [SerializeField] private MainUIController mainUIController;
@@ -17,11 +19,26 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     /// 現在読み込んでいるステージデータ
     /// </summary>
     public StageObjectsController StageObjectController { get; private set; }
+    private AsyncOperationHandle<GameObject> stageObjectControllerObj;
 
     /// <summary>
     /// ゲームの進行状況
     /// </summary>
     public GameState CurrentGameState { get; private set; }
+
+    public static GameManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -44,21 +61,16 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     /// </summary>
     private void StartGame()
     {
-        mainUIController.ShowStartPanel();
+        mainUIController.ShowStartPanelAtAwake();
     }
 
     /// <summary>
-    /// ステージをAddressableからIDで読み込む
+    /// ステージをAddressableからIDで読み込む MainUIControllerからユーザー操作にて呼び出される
     /// </summary>
-    public void LoadStage(int stageId)
+    public void LoadStage(string stageId)
     {
-        var handle = Addressables.LoadAssetAsync<StageObjectsController>($"StageData_{stageId}");
-        handle.Completed += op =>
-        {
-            StageObjectController = op.Result;
-            GameObject.Instantiate(StageObjectController);
-            OnStageLoaded();
-        };
+        stageObjectControllerObj = Addressables.InstantiateAsync(stageId, new Vector3(0, 0, 0), Quaternion.identity);
+        stageObjectControllerObj.Completed += (obj) => OnStageLoaded();
     }
 
     /// <summary>
@@ -66,6 +78,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     /// </summary>
     private void OnStageLoaded()
     {
+        StageObjectController = stageObjectControllerObj.Result.GetComponent<StageObjectsController>();
+        allUnitsController.OnStageLoaded(StageObjectController);
     }
 
     /// <summary>
@@ -73,6 +87,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     /// </summary>
     public void OnUnitsLoaded()
     {
+        CurrentGameState = GameState.Playing;
     }
 
     /// <summary>
@@ -82,61 +97,28 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     {
     }
 
+    /// <summary>
+    /// ゲームを終了する StartPanelまたはresultPanelのExitButtonから呼び出される
+    /// </summary>
+    public void EndGame()
+    {
+        if (stageObjectControllerObj.IsValid())
+        {
+            Addressables.ReleaseInstance(stageObjectControllerObj);
+        }
+        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+    }
     #endregion
 
 }
 
-//シングルトンなMonoBehaviourの基底クラス
-public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
-{
-    static T instance;
-    public static T Instance
-    {
-        get
-        {
-            if (instance != null) return instance;
-            instance = (T)FindObjectOfType(typeof(T));
-
-            if (instance == null)
-            {
-                Debug.LogWarning(typeof(T) + " is nothing");
-            }
-
-            return instance;
-        }
-    }
-
-    public static T InstanceNullable
-    {
-        get
-        {
-            return instance;
-        }
-    }
-
-    protected virtual void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Debug.LogError(typeof(T) + " is multiple created", this);
-            return;
-        }
-
-        instance = this as T;
-    }
-
-    protected virtual void OnDestroy()
-    {
-        if (instance == this)
-        {
-            instance = null;
-        }
-    }
-}
 
 public enum GameState
 {
     Title,
-    Game,
+    Playing,
     Result,
 }

@@ -11,6 +11,7 @@ namespace MainUI
     /// </summary>
     public class ResultPanel : MonoBehaviour
     {
+
         // Start is called before the first frame update
         void Start()
         {
@@ -26,10 +27,22 @@ namespace MainUI
         /// <summary>
         /// パネルを表示する ゲームが終わるときのアニメーションのため、エモい感じのアニメーションを利用する
         /// </summary>
-        internal void ShowPanel()
+        internal void ShowPanel(bool animation)
         {
             gameObject.SetActive(true);
-            // ここにアニメーションを追加する
+            if (animation)
+            {
+                // ここにアニメーションを追加する
+            }
+        }
+
+        /// <summary>
+        /// パネルを隠す ゲームが終わるときのアニメーションのため、エモい感じのアニメーションを利用する
+        /// </summary>
+        /// <param name="animation"></param>
+        internal void HidePanel()
+        {
+            gameObject.SetActive(false);
         }
     }
 }
