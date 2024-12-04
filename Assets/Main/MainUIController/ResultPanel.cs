@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
 
 namespace MainUI
 {
@@ -11,11 +12,25 @@ namespace MainUI
     /// </summary>
     public class ResultPanel : MonoBehaviour
     {
+        [SerializeField] internal Button retryButton;
+        [SerializeField] Button exitButton;
+
+
+        Image backgroundImage;
+
+        private void Awake()
+        {
+            backgroundImage = GetComponent<Image>();
+            exitButton.onClick.AddListener(() =>
+            {
+                GameManager.Instance.EndGame();
+            });
+        }
 
         // Start is called before the first frame update
         void Start()
         {
-
+            
         }
 
         // Update is called once per frame
@@ -27,13 +42,9 @@ namespace MainUI
         /// <summary>
         /// パネルを表示する ゲームが終わるときのアニメーションのため、エモい感じのアニメーションを利用する
         /// </summary>
-        internal void ShowPanel(bool animation)
+        internal void ShowPanel(string stageID, bool doesWin)
         {
             gameObject.SetActive(true);
-            if (animation)
-            {
-                // ここにアニメーションを追加する
-            }
         }
 
         /// <summary>

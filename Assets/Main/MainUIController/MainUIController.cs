@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+// StageIDがInspector上で設定されており、難易度などがあればそれらのデータと紐づけるためのデータの参照元が必要
+
 // namespace MainUIにはMainUIControllerとそれに付随するクラスを定義する
 namespace MainUI
 {
@@ -26,9 +28,9 @@ namespace MainUI
             gameManager = GameManager.Instance;
             startPanel.stageButtons.ForEach(b =>
             {
-                b.Button.onClick.AddListener(() =>
+                b.button.onClick.AddListener(() =>
                 {
-                    LoadStage(b.ID);
+                    LoadStage(b.stageID);
                 });
             });
         }
@@ -51,7 +53,7 @@ namespace MainUI
             StartCoroutine(ShowLoadingAtLoadGame());
         }
 
-        #region Action from Panels
+
         /// <summary>
         /// 起動時にGameManagerから呼ばれる
         /// </summary>
@@ -80,7 +82,23 @@ namespace MainUI
             loadingPanel.HidePanel(true);
         }
 
-        #endregion
+        /// <summary>
+        /// リザルト画面が表示される Gamemanagerから呼ばれる
+        /// </summary>
+        public IEnumerator ShowResultPanel(string doneStageID, bool doesWin)
+        {
+            const float duration = 0.5f;
+            loadingPanel.ShowPanel(duration);
+            yield return new WaitForSeconds(duration);
+            resultPanel.ShowPanel(doneStageID, doesWin);
+            resultPanel.retryButton.onClick.RemoveAllListeners();
+            resultPanel.retryButton.onClick.AddListener(() =>
+            {
+                LoadStage(doneStageID);
+            });
+            loadingPanel.HidePanel(true);
+        
+        }
     }
 
 }

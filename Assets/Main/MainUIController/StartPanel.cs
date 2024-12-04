@@ -16,7 +16,7 @@ namespace MainUI
     public class StartPanel : MonoBehaviour
     {
 
-        [SerializeField] internal List<StartPanelButtonStageID> stageButtons;
+        [SerializeField] internal List<ButtonAndStageID> stageButtons;
         [Tooltip("ゲームを終了するボタン")]
         [SerializeField] private Button exitButton;
 
@@ -29,9 +29,9 @@ namespace MainUI
             });
             stageButtons.ForEach(b =>
             {
-                b.Button.onClick.AddListener(() =>
+                b.button.onClick.AddListener(() =>
                 {
-                    stageButtons.ForEach(s => s.Button.interactable = false);
+                    stageButtons.ForEach(s => s.button.interactable = false);
                 });
             });
         }
@@ -52,7 +52,7 @@ namespace MainUI
         /// </summary>
         internal void ShowPanel()
         {
-            stageButtons.ForEach(b=> b.Button.interactable = true);
+            stageButtons.ForEach(b=> b.button.interactable = true);
             gameObject.SetActive(true);
         }
 
@@ -68,16 +68,22 @@ namespace MainUI
     /// <summary>
     /// ステージが01とTurorialのみなので仮に、Buttonにaddresaable IDを持たせる
     /// </summary>
-    [Serializable] internal class StartPanelButtonStageID
+    [Serializable] internal class ButtonAndStageID
     {
         /// <summary>
         /// Button
         /// </summary>
-        public Button Button;
+        public Button button;
         /// <summary>
         /// Button選択でLoadするStageのAddressable ID
         /// </summary>
         [Tooltip("Button選択でLoadするStageのAddressable ID")]
-        public string ID;
+        public string stageID;
+
+        public ButtonAndStageID(Button button, string id)
+        {
+            this.button = button;
+            stageID = id;
+        }
     }
 }

@@ -70,5 +70,19 @@ namespace StageObjects
         [Tooltip("wayのポイントを入れたObject")]
         [SerializeField] internal Transform pointsParent;
         [SerializeField] internal Color color = Color.green;
+        [Tooltip("一時停止地点とその秒数の設定")]
+        [SerializeField] internal List<EditorWayStopPoint> stopPoints = new List<EditorWayStopPoint>();
+    }
+
+    /// <summary>
+    /// EditorWayPointに一時停止地点のIndexを紐づけるためのもの
+    /// </summary>
+    [Serializable]
+    class EditorWayStopPoint
+    {
+        [Tooltip("一時停止地点のindex")]
+        [SerializeField] internal int waysIndex;
+        [Tooltip("一時停止を行う時間 マイナスならずっと停止")]
+        [SerializeField] internal float stopTime;
     }
 }

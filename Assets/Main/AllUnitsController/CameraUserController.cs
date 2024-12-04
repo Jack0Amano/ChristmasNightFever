@@ -14,7 +14,6 @@ namespace Units
 {
     public class CameraUserController : MonoBehaviour
     {
-        [SerializeField] public Camera mainCamera;
         [Tooltip("カメラのマウスコントロールの是非")]
         [SerializeField] public bool enableCameraControlling = true;
         //[SerializeField] UnitsController unitsController;
@@ -77,6 +76,8 @@ namespace Units
         /// TacticsのUI表示Tablet
         /// </summary>
         //[NonSerialized] public TacticsTablet.TacticsTablet TacticsTablet;
+
+        public Camera MainCamera { private set; get; }
 
         /// <summary>
         /// Followカメラが操作されていないときにターゲットの裏に自動的に回り込む機能を停止
@@ -219,6 +220,7 @@ namespace Units
         #region Base functions
         private void Awake()
         {
+            MainCamera = this.GetComponent<Camera>();
             stationaryCameraMask = LayerMask.GetMask(new string[] { "Object", "SeeThrough" });
             gameManager = GameManager.Instance;
             Mode = CameraMode.Follow;
@@ -227,14 +229,14 @@ namespace Units
         // Start is called before the first frame update
         void Start()
         {
-            Vector3 angles = mainCamera.transform.eulerAngles;
+            Vector3 angles = MainCamera.transform.eulerAngles;
             xDeg = angles.x;
             yDeg = angles.y;
             currentDistance = distance;
             desiredDistance = distance;
             correctedDistance = distance;
 
-            cinemachineBrain = mainCamera.GetComponent<CinemachineBrain>();
+            cinemachineBrain = MainCamera.GetComponent<CinemachineBrain>();
             if (cinemachineBrain == null)
                 PrintError("CinemachineBrain is not attached to MainCamera");
 
@@ -567,7 +569,7 @@ namespace Units
         public void RotateBehindTarget(bool lerp)
         {
             float targetRotationAngle = TargetToFollow.transform.eulerAngles.y;
-            float currentRotationAngle = mainCamera.transform.eulerAngles.y;
+            float currentRotationAngle = MainCamera.transform.eulerAngles.y;
             float lerpAngle = Mathf.LerpAngle(currentRotationAngle, targetRotationAngle, rotationDampening * Time.deltaTime);
             xDeg = lerp ? lerpAngle : targetRotationAngle;
 
@@ -942,13 +944,13 @@ namespace Units
 
             // カメラの遷移でカメラ間の距離が離れている場合はCutBlendを使用する
             var cameraModeCut = false;
-            var distOldToNewCamera = Vector3.Distance(mainCamera.transform.position, cam.transform.position);
-            var direction = cam.transform.position - mainCamera.transform.position;
+            var distOldToNewCamera = Vector3.Distance(MainCamera.transform.position, cam.transform.position);
+            var direction = cam.transform.position - MainCamera.transform.position;
             if (distOldToNewCamera > DistanceOfChangeCameraBlendToCut)
                 cameraModeCut = true;
 
             // カメラの遷移でカメラ間に障害物がある場合はCutBlendを使用する
-            var ray = new Ray(mainCamera.transform.position, direction * 30);
+            var ray = new Ray(MainCamera.transform.position, direction * 30);
             if (Physics.Raycast(ray, out var hit, 100, stationaryCameraMask))
             {
                 if (hit.distance < distOldToNewCamera)

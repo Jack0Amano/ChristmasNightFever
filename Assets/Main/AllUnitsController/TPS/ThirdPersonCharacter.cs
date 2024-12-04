@@ -165,7 +165,6 @@ namespace Units.TPS
         void Awake()
         {
             m_Animator = GetComponent<Animator>();
-            print(m_Animator);
             m_Rigidbody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
             m_CapsuleHeight = m_Capsule.height;
@@ -180,9 +179,9 @@ namespace Units.TPS
             //BodyTrigger.StayAlongWallActionHandler = StayAlonwWallCallback;
             //BodyTrigger.ExitAlongWallActionHandler = ExitAlongWallCallback;
 
-            MoveAlongWallAnimationTotalDuration = MoveFollowingWallAnimationCurve.keys.Last().time;
-            MaxSpeedWhenFollowWall = MoveFollowingWallAnimationCurve.keys.Last().value;
-            StartToMoveTimeOnFollowingWall = DateTime.Now;
+            //MoveAlongWallAnimationTotalDuration = MoveFollowingWallAnimationCurve.keys.Last().time;
+            //MaxSpeedWhenFollowWall = MoveFollowingWallAnimationCurve.keys.Last().value;
+            //StartToMoveTimeOnFollowingWall = DateTime.Now;
         }
 
 
@@ -347,7 +346,6 @@ namespace Units.TPS
             if (dash)
             {
                 move *= DashSpeed;
-                print(move);
                 FollowWallObject = null;
             }
 
@@ -373,7 +371,7 @@ namespace Units.TPS
         /// World座標軸を基準にした移動 XがTurn YがForward
         /// </summary>
         /// <param name="move">YがForward XがTurn</param>
-        /// <param name="speed">1(歩行)~2(走る)</param>
+        /// <param name="speed">0.5(歩行)~1(走る)</param>
         public void WorldMove(Vector2 move, float speed)
         {
             move.Normalize();

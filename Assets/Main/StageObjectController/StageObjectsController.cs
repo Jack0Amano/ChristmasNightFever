@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.EventSystems;
+using System;
+using Units;
 
 namespace StageObjects
 {
@@ -17,6 +20,11 @@ namespace StageObjects
         [SerializeField] public EditorWays editorWays;
 
         /// <summary>
+        /// Unitがゴールに到達したときにAllUnitsControllerに通知するイベント
+        /// </summary>
+        internal event EventHandler<Units.UnitActionEventArgs> OnGoalReached;
+
+        /// <summary>
         /// Playerのスポーン地点 CheckPointsの中からPlayerSpawnのCheckPointを取得する
         /// </summary>
         public CheckPoint PlayerSpawnPoint { get; private set; }
@@ -25,6 +33,8 @@ namespace StageObjects
         /// Enemyのスポーン地点 EditorWaysの中から経路index=0の最初のPointを取得する
         /// </summary>
         public List<Transform> EnemySpawnPoints { get; private set; }
+
+        public CheckPoint GoalCheckPoint { get; private set; }
 
 
         /// <summary>
@@ -37,19 +47,31 @@ namespace StageObjects
             CheckPoints = new List<CheckPoint>(checkPointsParent.GetComponentsInChildren<CheckPoint>());
             PlayerSpawnPoint = CheckPoints.Find(cp => cp.checkPointType == CheckPointType.PlayerSpawn);
             EnemySpawnPoints = editorWays.ways.ConvertAll(w => w.pointsParent.GetChild(0));
+            GoalCheckPoint = CheckPoints.Find(cp => cp.checkPointType == CheckPointType.Goal);
         }
 
 
         // Start is called before the first frame update
         void Start()
         {
-
+            GoalCheckPoint.NortifyTrigger.OnTriggerEnterAction += (c =>
+            {
+                var unitObject = c.gameObject;
+                var unitController = unitObject.GetComponent<UnitController>();
+                if (unitController != null && unitController.unitType == UnitType.Player)
+                    OnGoalReached?.Invoke(this, new UnitActionEventArgs(unitController, UnitAction.Goal));
+            });
         }
 
         // Update is called once per frame
         void Update()
         {
 
+        }
+
+        private void OnDestroy()
+        {
+            OnGoalReached = null;
         }
     }
 

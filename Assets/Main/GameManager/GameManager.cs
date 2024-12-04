@@ -15,11 +15,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("AllUnitsControllerを設定する")]
     [SerializeField] private AllUnitsController allUnitsController;
 
-    /// <summary>
-    /// 現在読み込んでいるステージデータ
-    /// </summary>
-    public StageObjectsController StageObjectController { get; private set; }
+
     private AsyncOperationHandle<GameObject> stageObjectControllerObj;
+
+    public string CurrentStageId { get; private set; }
 
     /// <summary>
     /// ゲームの進行状況
@@ -69,6 +68,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void LoadStage(string stageId)
     {
+        CurrentStageId = stageId;
         stageObjectControllerObj = Addressables.InstantiateAsync(stageId, new Vector3(0, 0, 0), Quaternion.identity);
         stageObjectControllerObj.Completed += (obj) => OnStageLoaded();
     }
@@ -78,8 +78,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void OnStageLoaded()
     {
-        StageObjectController = stageObjectControllerObj.Result.GetComponent<StageObjectsController>();
-        allUnitsController.OnStageLoaded(StageObjectController);
+        var stageObjectController = stageObjectControllerObj.Result.GetComponent<StageObjectsController>();
+        allUnitsController.OnStageLoaded(stageObjectController);
     }
 
     /// <summary>
@@ -88,13 +88,21 @@ public class GameManager : MonoBehaviour
     public void OnUnitsLoaded()
     {
         CurrentGameState = GameState.Playing;
+        UserController.enableCursor = false;
     }
 
     /// <summary>
     /// ゲームの結果が出た際にAllUnitsControllerから呼び出される
     /// </summary>
-    public void OnGameResult()
+    public void OnGameResult(bool doseWin)
     {
+        
+        UserController.enableCursor = true;
+        CurrentGameState = GameState.Result;
+        StartCoroutine(mainUIController.ShowResultPanel(CurrentStageId, doseWin));
+        CurrentStageId = "";
+        // stageObjectControllerの破棄
+        Addressables.ReleaseInstance(stageObjectControllerObj);
     }
 
     /// <summary>
@@ -121,4 +129,12 @@ public enum GameState
     Title,
     Playing,
     Result,
+}
+
+/// <summary>
+/// ゲームの結果
+/// </summary>
+public enum ResultState
+{
+
 }

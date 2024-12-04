@@ -8,7 +8,7 @@ namespace StageObjects
     /// ステージの各種チェックポイント(Goal, Event, etc.)を設定するためのコンポーネント   
     /// このコンポーネントをつけてstageObjectにアタッチすることで、ステージのチェックポイントとして機能する
     /// </summary>
-
+    [RequireComponent(typeof(NotifyTrigger))]
     public class CheckPoint : MonoBehaviour
     {
         [Tooltip("チェックポイントの種類を設定する")]
@@ -16,6 +16,16 @@ namespace StageObjects
 
         [Tooltip("チェックポイントのIDを設定する イベントなどで使われる")]
         [SerializeField] internal int checkPointID;
+
+        [Tooltip("イベントで表示されるテキスト")]
+        [SerializeField] internal string eventText;
+
+        internal NotifyTrigger NortifyTrigger { private set; get; }
+
+        private void Awake()
+        {
+            NortifyTrigger = GetComponent<NotifyTrigger>();
+        }
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()

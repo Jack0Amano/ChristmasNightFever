@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
   <diagram name="ページ1" id="IcnlXymfl3ra3HIMCKri">
-    <mxGraphModel dx="934" dy="561" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1920" math="0" shadow="0">
+    <mxGraphModel dx="611" dy="367" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1920" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -698,6 +698,83 @@
         </mxCell>
         <mxCell id="jXujLD4FF0cwBqFkgT6Y-1" value="ShowLoadingPanel()" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="340" y="970" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-2" value="カーソルの表示非表示は&lt;div&gt;UserControllerから&lt;/div&gt;&lt;div&gt;GameStateと連動&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="15" y="1330" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-8" value="CheckPointにGoal PlayerSpawn,&amp;nbsp; Event (ID)&lt;div&gt;の機能をつける&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1980" y="2565.5" width="260" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-9" value="この中で今から実装するのは Goal&lt;div&gt;最初にGoalで&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1995" y="2612.5" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-10" value="CheckPointはColliderをつけてキーにも出来る&lt;div&gt;Goal, Eventにて利用する&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1965" y="2674.5" width="270" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-11" value="NavgationMeshを利用した自動移動を実装する&lt;div&gt;これはEnemyAIクラスに&lt;/div&gt;&lt;div&gt;すなわちEnemyAIクラスは自分のWaysの情報を保つ必要がある&lt;/div&gt;&lt;div&gt;AllUnitsControllerからSpawn時に渡される&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1890" y="3335" width="370" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="jXujLD4FF0cwBqFkgT6Y-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1750" y="3450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-12" value="変則的な移動のシステム&lt;div&gt;Noiseを近くで鳴らしたときに見に来るシステム&lt;/div&gt;&lt;div&gt;AIのNavigationに割り込みの形で実装する&lt;/div&gt;&lt;div&gt;これの通りのルーチンを構築&lt;/div&gt;&lt;div&gt;ベルを鳴らすアニメーションをUpperLayerに追加&lt;/div&gt;&lt;div&gt;ButtonPushingのモーションを利用する&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1930" y="3424" width="290" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-14" value="指を鳴らした以外にも走った騒音も&lt;div&gt;できたら実装&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1795" y="4425" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-15" value="雪が残っている箇所などの騒音を発生させる床の実装&lt;div&gt;はオプション&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1750" y="4460" width="310" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-16" value="見つかったときのアニメーション" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1965" y="3550" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-17" value="イベントUIの実装&lt;div&gt;EventNodeの利用&lt;/div&gt;&lt;div&gt;CheckPointのInspectorにとりあえず直書き&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1940" y="3599" width="250" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-18" value="&lt;h2&gt;その他のこだわり&lt;/h2&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1790" y="4012" width="190" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-19" value="雪が降るパーティクルを作成" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="4052" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-20" value="DynamicSkyboxで夜の雰囲気を再現" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1970" y="3791" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-21" value="画面エフェクトでぼんやりとした雰囲気にする" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1735" y="4110" width="280" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-22" value="スタート画面とリザルト画面にて表示されるアニメーション" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1715" y="4152" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-23" value="StartUIをPMCのところから移植してくる" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1765" y="4182" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-24" value="音関連の実装&lt;div&gt;BGMはコンコンと雪が降っている感じの少しおとなしい奴&lt;/div&gt;&lt;div&gt;見つかるとサンタがびっくりした声を出して&lt;/div&gt;&lt;div&gt;子どもが笛を吹く&lt;/div&gt;&lt;div&gt;子どもの集まる声&lt;/div&gt;&lt;div&gt;足音、雪の箇所と普通の地面の箇所の&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1895" y="3679" width="340" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-25" value="家の窓が光っている様子を出す" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1970" y="3821" width="190" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-26" value="見つかったときの笛の音に反応してエクスクラメーションマークが次々に付く様子&lt;div&gt;HeadUpIConの透過&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1655" y="4243" width="470" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-27" value="子どもの後ろを走ったときの強制発見&lt;div&gt;歩きは見つからない&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="4292" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-28" value="チュートリアル用に子どもに見つかってもそのまま続けられる奴&lt;div&gt;エクスクラメーションマークを置く&lt;/div&gt;&lt;div&gt;HeadUpIconのみ動くマネキンを使ってテキストで説明してもいいけど&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="4365" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-29" value="テキストを出力している時になるカタカタ音" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1765" y="4510" width="260" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-30" value="サンタが壁に沿った移動を行う際のアニメーション" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1760" y="4548" width="300" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-31" value="Through, Wait(second)はEditorWays&lt;div&gt;複雑になるがEditorWaysのDrawGizomosをあまり重くしたくないので　&lt;/div&gt;&lt;div&gt;新規Serializable class&lt;/div&gt;&lt;div&gt;int index&lt;/div&gt;&lt;div&gt;waitsecond (0ならthrough)のを EditorWaysのInspectorに作る&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1890" y="3117.5" width="410" height="90" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
