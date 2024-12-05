@@ -11,6 +11,7 @@ namespace Units.AI
     /// <summary>
     /// 敵のAIを制御する
     /// </summary>
+    [RequireComponent(typeof(NavMeshAgent))]
     public class EnemyAI : MonoBehaviour
     {
         [Tooltip("プレイヤーを検知できる最大距離")]
@@ -47,7 +48,7 @@ namespace Units.AI
         /// </summary>
         internal UnitController playerUnitController;
 
-        internal ThirdPersonUserControl TPSController;
+        internal ThirdPersonUserControl tpsController;
 
         /// <summary>
         /// 前回TryFindPlayerを呼び出しでからの経過ミリ秒
@@ -56,6 +57,18 @@ namespace Units.AI
 
         private NavMeshAgent navMeshAgent;
         private NavMeshObstacle navMeshObstacle;
+
+        /// <summary>
+        /// AIが移動する経路 EditorWaysで指定されてUnitの設置時にAllUnitsControllerによってSetUnitAsEnemyで設定される
+        /// </summary>
+        internal List<StageObjects.PointAndStopTime> way;
+
+        /// <summary>
+        /// 現在のwayのIndex 0からスタート　向かおうとした瞬間にIndexが加算されていく
+        /// </summary>
+        private int currentWayIndex = 0;
+
+        private EnemyAIMoveState moveState = EnemyAIMoveState.Idle;
 
         // Start is called before the first frame update
         void Start()
@@ -70,6 +83,10 @@ namespace Units.AI
 
         private void FixedUpdate()
         {
+            // SetUnitAsEnemy(List<StageObjects.PointAndStopTime> way)を呼び出してEnemyAIを設定していない場合は何もしない
+            if (playerUnitController == null)
+                return;
+
             // FixedUpdateで呼び出す理由はCorutine内ループでの呼び出しだとObjectが消えたときなど後処理が面倒なため
             // FixedUpdateが遅延する場合はCoroutine内に変更する
             // 距離と角度で脚切りするし、raycastを飛ばすのもdetectUnitTick毎だが近くに大量の敵がいる場合は負荷がかかる可能性がある
@@ -84,12 +101,42 @@ namespace Units.AI
         #region Move with AI
         // navmeshagentを使って移動する場合は　NavMeshAgentのComponentを追加しておく
 
+        public IEnumerator MoveToNextWay()
+        {
+            if (way.Count == 0)
+            {
+                yield break;
+            }
+            if (currentWayIndex >= way.Count)
+            {
+                currentWayIndex = 0;
+            }
+            var currentWay = way[currentWayIndex];
+            if (currentWay.stopTime > 0)
+            {
+                // ここでcurrentWay.stopTime秒だけ待つ
+                yield return new WaitForSeconds(currentWay.stopTime);
+            }
+            else if (currentWay.stopTime < 0)
+            {
+                // ここでcurrentWay.stopTime秒だけ待つ
+                yield return null;
+            }
+
+            currentWayIndex++;
+            var nextWay = way[currentWayIndex];
+            // ここでFindOutLevelを監視しながら移動が完了するまで待つ
+
+            yield return MoveTo(nextWay.pointTransform.position);
+        }
+
         /// <summary>
         /// NavMeshを使用してLocationに移動
         /// </summary>
         /// <param name="location"></param>
         public IEnumerator MoveTo(Vector3 location)
         {
+            moveState = EnemyAIMoveState.Move;
             // NavMeshObstacleは他のUnitとの衝突を避けるために使う今回はなしでいい
             //navMeshObstacle.enabled = false;
             //navMeshAgent.enabled = true;
@@ -97,13 +144,13 @@ namespace Units.AI
             // navMeshAgent.SetDestination(location);
 
             location.y = this.transform.position.y;
-            yield return StartCoroutine(TPSController.AutoMove(location, navMeshAgent, debugDrawAimWalkingLine));
-
+            yield return StartCoroutine(tpsController.AutoMove(location, navMeshAgent, debugDrawAimWalkingLine));
+            tpsController.CancelAutoMoving();
             //navMeshAgent.isStopped = true;
 
             //navMeshAgent.enabled = false;
 
-            yield return true;
+            moveState = EnemyAIMoveState.Idle;
         }
         #endregion
 
@@ -188,5 +235,32 @@ namespace Units.AI
         #endregion
    
         
+    }
+
+    /// <summary>
+    ///　敵のAIが現在どの様な行動を取っているか
+    /// </summary>
+    enum EnemyAIMoveState
+    {
+        /// <summary>
+        /// ループを完全終了
+        /// </summary>
+        Finish,
+        /// <summary>
+        /// 停止中
+        /// </summary>
+        Idle,
+        /// <summary>
+        /// Wayに沿って移動中
+        /// </summary>
+        Move,
+        /// <summary>
+        /// 不審な場所を発見しそこに向かっている
+        /// </summary>
+        Search,
+        /// <summary>
+        /// 不審な場所の探索から帰ってきている
+        /// </summary>
+        Back
     }
 }

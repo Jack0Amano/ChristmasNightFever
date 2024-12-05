@@ -97,6 +97,10 @@ public class UserController : MonoBehaviour
                 MouseGrab = true;
             MouseClickUp = Input.GetMouseButtonUp(0);
 
+            MouseRightDown = Input.GetMouseButtonDown(1);
+            MouseRightUp = Input.GetMouseButtonUp(1);
+            MouseRight = Input.GetMouseButton(1);
+
             if (MouseClickUp && MouseGrab)
                 MouseGrab = false;
 

@@ -17,6 +17,38 @@ namespace StageObjects
         [Tooltip("GridPointの番号表示のGUIテキスト")]
         [SerializeField] private GUIStyle passGuiStyle;
 
+        private void Awake()
+        {
+            // waysのPointAndStopTimeを自動補完する (一時停止ポイントに指定された場所以外通過ポイントで埋める)
+            foreach (var w in ways)
+            {
+                if (w == null)
+                    continue;
+                if (w.pointsParent == null)
+                    continue;
+                if (!w.enable)
+                    continue;
+
+                var count = 0;
+                foreach (Transform pass in w.pointsParent.transform)
+                {
+                    var index = w.pointAndStops.FindIndex(p => p.index == count);
+                    if (index == -1)
+                    {
+                        w.pointAndStops.Add(new PointAndStopTime (count, 0, pass));
+                    }
+                    else
+                    {
+                        w.pointAndStops[index].pointTransform = pass;
+                    }
+                    count++;
+                }
+                w.pointAndStops.Sort((a, b) => a.index - b.index);
+                // Inspectorでpointsよりも多い数のpointAndStopがある場合は削除 Inspectorで誤入力している
+                w.pointAndStops.Slice(0, count);
+            }
+        }
+
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()
@@ -61,28 +93,38 @@ namespace StageObjects
     }
 
     /// <summary>
-    /// 経路の各ポイントを入れた親Objectとその設定を紐づけるためのもの
+    /// 経路の各ポイントを入れた親Objectとその設定を紐づけるためのもの  また経路をたどるUnitのAIに渡される
     /// </summary>
     [Serializable]
-    class EditorWaysPointParent
+    public class EditorWaysPointParent
     {
         [SerializeField] internal bool enable = true;
         [Tooltip("wayのポイントを入れたObject")]
         [SerializeField] internal Transform pointsParent;
         [SerializeField] internal Color color = Color.green;
-        [Tooltip("一時停止地点とその秒数の設定")]
-        [SerializeField] internal List<EditorWayStopPoint> stopPoints = new List<EditorWayStopPoint>();
+        [Tooltip("一時停止地点とその秒数の設定 一時停止地点のみ書き込めば良い ただの通過地点なら実行時自動補完する")]
+        [SerializeField] public List<PointAndStopTime> pointAndStops = new List<PointAndStopTime>();
     }
 
     /// <summary>
     /// EditorWayPointに一時停止地点のIndexを紐づけるためのもの
     /// </summary>
     [Serializable]
-    class EditorWayStopPoint
+    public class PointAndStopTime
     {
         [Tooltip("一時停止地点のindex")]
-        [SerializeField] internal int waysIndex;
+        [SerializeField] public int index;
         [Tooltip("一時停止を行う時間 マイナスならずっと停止")]
-        [SerializeField] internal float stopTime;
+        [SerializeField] public float stopTime;
+        [Tooltip("通過もしくは一時停止地点のTransform ランタイムで自動補完される")]
+        [NonSerialized] public Transform pointTransform;
+
+        internal PointAndStopTime(int waysIndex, float stopTime, Transform pointTransform)
+        {
+            this.index = waysIndex;
+            this.stopTime = stopTime;
+            this.pointTransform = pointTransform;
+
+        }
     }
 }

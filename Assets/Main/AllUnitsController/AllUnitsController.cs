@@ -57,10 +57,10 @@ namespace Units
             {
                 // Enemy Unitの設置をStageObjectControllerのEditWay index=0から取得
                 // Player Unitの設置をStageObjectControllerのチェックポイントから取得
-                var spawnCorutines = stageObjectsController.EnemySpawnPoints.ConvertAll(spawnPoint =>
+                var spawnCorutines = stageObjectsController.EnemyWays.ConvertAll(way =>
                 {
                     var enemyID = enemyUnitIDList[Random.Range(0, enemyUnitIDList.Count)];
-                    return StartCoroutine(SpawnUnit(spawnPoint, enemyID, UnitType.Enemy));
+                    return StartCoroutine(SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointAndStops));
                 });
                 spawnCorutines.Add(StartCoroutine(SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player)));
 
@@ -81,8 +81,9 @@ namespace Units
         /// UnitのIDをAddressableから読み込み、transformの位置に設置する
         /// </summary>
         /// <param name="spawnPoint"></param>
+        /// <param name="way">UnityがEnemyの際には移動経路の設定を渡す</param>
         /// <returns></returns>
-        IEnumerator SpawnUnit(Transform spawnPoint, string id, UnitType unitType)
+        IEnumerator SpawnUnit(Transform spawnPoint, string id, UnitType unitType, List<PointAndStopTime> way=null)
         {
             var handle = Addressables.InstantiateAsync(id, spawnPoint.position, spawnPoint.rotation);
             asyncOperationHandles.Add(handle);
@@ -97,6 +98,7 @@ namespace Units
             else
             {
                 EnemyUnitControllers.Add(unitController);
+                unitController.SetUnitAsEnemy(way);
             }
             unitController.OnUnitAction += OnUnitAction;
         }

@@ -15,11 +15,14 @@ namespace Units
     {
         [Tooltip("Unitの種類を設定する")]
         [SerializeField] internal UnitType unitType;
-        [SerializeField] CameraUserController cameraUserController;
+
 
         // PlayerTargetを持つColliderとDefaultLayerのObjectのColliderは衝突しない設定になっている
         [Tooltip("UnitがPlayerである場合、敵に見つけられる判定\nClliderを持ちLayerがPlayerTargetに設定されている必要がある")]
         [SerializeField] internal Collider targetCollider;
+
+        [Header("Debug用に使うCamera\nこれをセットするとUnitControllerとCameraUserControllerのみでTPS操作が可能になる")]
+        [SerializeField] CameraUserController cameraUserController;
 
         /// <summary>
         /// AllUnitCon.OnUnitAction(UnitActionEventArgs e)を呼び出すためのイベント
@@ -42,14 +45,17 @@ namespace Units
         /// </summary>
         EnemyAI enemyAI;
 
+
         private void Awake()
         {
             TPSController = GetComponent<ThirdPersonUserControl>();
-            if (unitType == UnitType.Enemy)
+
+            if (cameraUserController != null)
             {
-                enemyAI = GetComponent<EnemyAI>();
-                enemyAI.playerUnitController = PlayerUnitController;
-                enemyAI.OnFoundPlayer += (sender, e) => FoundYou();
+                Print("Debug mode is enabled");
+                UserController.enableCursor = false;
+                TPSController.IsTPSControllActive = true;
+                StartCoroutine(cameraUserController.ChangeModeFollowTarget(TPSController));
             }
         }
 
@@ -61,11 +67,30 @@ namespace Units
         // Update is called once per frame
         void Update()
         {
-
+            if (UserController.MouseClickDown)
+            {
+                StartCoroutine(TPSController.Killed());
+            }
+            else if (UserController.MouseRightDown)
+            {
+                TPSController.ResetKilled();
+            }
         }
 
         private void FixedUpdate()
         {
+        }
+
+        /// <summary>
+        /// EnemyとしてのUnitの初期設定
+        /// </summary>
+        /// <param name="way">AIが辿るポイントのリスト</param>
+        internal void SetUnitAsEnemy(List<StageObjects.PointAndStopTime> way)
+        {
+            enemyAI = GetComponent<EnemyAI>();
+            enemyAI.playerUnitController = PlayerUnitController;
+            enemyAI.OnFoundPlayer += (sender, e) => FoundYou();
+            enemyAI.way = way;
         }
 
         #region アニメーションなどを含むアクションを起こす

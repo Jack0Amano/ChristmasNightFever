@@ -1682,3 +1682,15 @@ public static class SerializableExtensions
         }
     }
 }
+
+public static class AnimatorExtensions
+{
+    /// <summary>
+    /// レイヤーのWeightの変更をdurationでアニメーションする
+    /// </summary>
+    public static void SetLayerWeight(this Animator animator, int layerIndex, float weight, float duration)
+    {
+        var start = animator.GetLayerWeight(layerIndex);
+        DOTween.To(() => start, x => animator.SetLayerWeight(layerIndex, x), weight, duration);
+    }
+}

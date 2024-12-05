@@ -34,8 +34,12 @@ namespace StageObjects
         /// </summary>
         public List<Transform> EnemySpawnPoints { get; private set; }
 
-        public CheckPoint GoalCheckPoint { get; private set; }
+        /// <summary>
+        /// Enemyの移動経路 EditorWaysのpointAndStopsがすべてのパスの通過地点と停止時間が入っている
+        /// </summary>
+        public List<EditorWaysPointParent> EnemyWays { get => editorWays.ways; }
 
+        public CheckPoint GoalCheckPoint { get; private set; }
 
         /// <summary>
         /// ステージのチェックポイント Playerのスポーン地点やGoalなどの情報を持つ

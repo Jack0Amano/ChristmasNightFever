@@ -435,7 +435,47 @@ namespace Units.TPS
         }
 
         #endregion
-    
+
+        #region Motions
+        // 細々としたモーション
+        /// <summary>
+        /// 左右を見渡すモーション
+        /// </summary>
+        /// <returns></returns>
+        internal IEnumerator Searching()
+        {
+            yield return StartCoroutine(m_Character.Searching());
+        }
+
+        /// <summary>
+        /// アイテムを使用して音を鳴らすモーション
+        /// </summary>
+        internal IEnumerator MakeNoize()
+        {
+            yield return StartCoroutine(m_Character.MakeNoize());
+        }
+
+        /// <summary>
+        /// キャラクターがkillされたときのモーション 
+        /// 他のレイヤーを0にしているためもとのアニメーションには戻らない　　　
+        /// つまり死んだら死んだまま
+        /// </summary>
+        /// <returns></returns>
+        internal IEnumerator Killed()
+        {
+            yield return StartCoroutine(m_Character.Killed());
+        }
+
+        /// <summary>
+        /// KilledされたUnitのアニメーションをもとに戻す
+        /// </summary>
+        internal void ResetKilled()
+        {
+
+           m_Character.ResetKilled();
+        }
+
+        #endregion
     }
 }
 

@@ -11,6 +11,9 @@ using System.Collections.Generic;
 
 namespace Units.TPS
 {
+    /// <summary>
+    /// Animatorに直接パラメーターを渡し制御する唯一のクラス
+    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(Animator))]
@@ -83,7 +86,14 @@ namespace Units.TPS
         CapsuleCollider m_Capsule;
         public bool m_Crouching { private set; get; }
         bool m_Aiming = false;
+
+        /// <summary>
+        /// Animatorのレイヤー
+        /// </summary>
+        const int BaseLayer = 0;
         const int UpperLayer = 1;
+        const int UpperLayerWithMask = 2;
+        const int OverlayLayer = 3;
 
         /// <summary>
         /// UnitがAlongWallに接触しておりカバー状態である
@@ -762,6 +772,63 @@ namespace Units.TPS
         }
         #endregion
 
+        #region Motions
+        // 各種細々としたモーション
+
+        /// <summary>
+        /// あたりを見回すSearchingモーション
+        /// </summary>
+        internal IEnumerator Searching()
+        {
+            // Searchingアニメーションは上半身の動きのアニメーションのためUpperLayerのブレンドを行う
+            // アニメーションは3秒で終了  0.5fはアニメーションの速度
+            // Weightは0.57がギリギリ自然 歩いていって停止を挟まずにSearchingに入るとより自然
+            m_Animator.SetLayerWeight(UpperLayer, 0.57f);
+            m_Animator.SetTrigger("Searching");
+
+            yield return new WaitForSeconds(3f / 0.5f);
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+        }
+
+        /// <summary>
+        /// ノイズを鳴らすモーション
+        /// </summary>
+        internal IEnumerator MakeNoize()
+        {
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayerWithMask, 1);
+            m_Animator.SetTrigger("UseItem");
+            yield return new WaitForSeconds(2.4f);
+            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
+        }
+
+        /// <summary>
+        /// 死亡するアニメーション　layerWeightを使ってすべてのモーションに優先する
+        /// </summary>
+        internal IEnumerator Killed()
+        {
+            const float duration = 0.3f;
+            m_Animator.SetLayerWeight(BaseLayer, 0, duration);
+            m_Animator.SetLayerWeight(UpperLayer, 0, duration);
+            m_Animator.SetLayerWeight(UpperLayerWithMask, 0, duration);
+            m_Animator.SetLayerWeight(OverlayLayer, 1, duration);
+            m_Animator.SetBool("Death", true);
+            yield return new WaitForSeconds(3.5f);
+        }
+
+        /// <summary>
+        /// KilledされたUnitのアニメーションをもとに戻す
+        /// </summary>
+        internal void ResetKilled()
+        {
+            m_Animator.SetLayerWeight(BaseLayer, 1);
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
+            m_Animator.SetLayerWeight(OverlayLayer, 0);
+            m_Animator.SetBool("Death", false);
+        }
+        
+        #endregion
     }
 
 }
