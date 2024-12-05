@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
   <diagram name="ページ1" id="IcnlXymfl3ra3HIMCKri">
-    <mxGraphModel dx="2049" dy="1196" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1920" math="0" shadow="0">
+    <mxGraphModel dx="1366" dy="797" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1920" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1150,6 +1150,21 @@
         </mxCell>
         <mxCell id="jXujLD4FF0cwBqFkgT6Y-155" value="PlayerUnit.transform.position" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="1880" y="5990" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-157" value="暗がりにいるときは見つかりにくいシステム" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="4608" width="260" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-158" value="まずはどうしたいか" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1535" y="6688" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-159" value="FIndPlayerDistanceの1/3の距離に入ると１秒で見つかるようにしたい&lt;div&gt;1/3の距離だと3回でアウト&lt;/div&gt;&lt;div&gt;ということは Delta = 0.3程度になるように&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="6733" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-160" value="detectUnitTickが0.3秒で回っているから3" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="6648" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jXujLD4FF0cwBqFkgT6Y-161" value="Text" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1595" y="6808" width="50" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

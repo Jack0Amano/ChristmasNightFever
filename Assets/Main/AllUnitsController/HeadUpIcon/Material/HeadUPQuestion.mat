@@ -121,7 +121,7 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Emission: 0.26
+    - _Emission: 2.5
     - _EnvironmentReflections: 1
     - _FindLevel: 0
     - _Float0: 1

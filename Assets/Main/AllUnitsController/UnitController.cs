@@ -82,6 +82,14 @@ namespace Units
         }
 
         /// <summary>
+        /// ゲームを開始する
+        /// </summary>
+        internal void StartToGame()
+        {
+            enemyAI?.NavigationAIEntryPoint();
+        }
+
+        /// <summary>
         /// EnemyとしてのUnitの初期設定
         /// </summary>
         /// <param name="way">AIが辿るポイントのリスト</param>
@@ -89,6 +97,7 @@ namespace Units
         {
             enemyAI = GetComponent<EnemyAI>();
             enemyAI.playerUnitController = PlayerUnitController;
+            enemyAI.tpsController = TPSController;
             enemyAI.OnFoundPlayer += (sender, e) => FoundYou();
             enemyAI.way = way;
         }
@@ -118,10 +127,12 @@ namespace Units
         internal IEnumerator Killed()
         {
             TPSController.IsTPSControllActive = false;
-            yield return new WaitForSeconds(3.0f);
 
             // ここで倒れるなどのアニメーションを再生する
             // カメラも倒れた者を撮る感じのアニメーションに変更
+            StartCoroutine(TPSController.Killed());
+
+            yield return new WaitForSeconds(3.0f);
 
             OnUnitAction?.Invoke(this, new UnitActionEventArgs(this, UnitAction.Die));
         }

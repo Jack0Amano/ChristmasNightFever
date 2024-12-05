@@ -117,6 +117,9 @@ namespace Units
             gameManager.OnUnitsLoaded();
             // CameraUserController‚ÉPlayer‚ÌTPSCon‚ð“n‚µ‚ÄA‚±‚ê‚ÉƒJƒƒ‰‚ðFollow‚³‚¹‚é
             StartCoroutine(cameraUserController.ChangeModeFollowTarget(PlayerUnitController.TPSController));
+
+            PlayerUnitController.StartToGame();
+            EnemyUnitControllers.ForEach(enemy => enemy.StartToGame());
         }
 
         /// <summary>

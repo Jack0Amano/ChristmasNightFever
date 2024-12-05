@@ -61,3 +61,11 @@ Update Mode: mergeDefaultDependencies
 
 The following packages were added:
   com.unity.postprocessing@3.2.2
+
+=== Thu Dec  5 14:37:53 2024
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.render-pipelines.universal from version 14.0.7 to 14.0.9

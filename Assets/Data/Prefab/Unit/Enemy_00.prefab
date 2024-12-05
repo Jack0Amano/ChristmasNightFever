@@ -114,6 +114,7 @@ GameObject:
   - component: {fileID: 7395116634029608227}
   - component: {fileID: 1915201500816599922}
   - component: {fileID: 441455746459995026}
+  - component: {fileID: 3760384989905313728}
   m_Layer: 0
   m_Name: Enemy_00
   m_TagString: Untagged
@@ -176,8 +177,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitType: 1
-  cameraUserController: {fileID: 0}
   targetCollider: {fileID: 0}
+  cameraUserController: {fileID: 0}
 --- !u!54 &6705456803210511
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -312,8 +313,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac4b3543a63f97f4eb827b04957394f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  findPlayerDistance: 28
-  findPlayerAngle: 45
+  findPlayerDistance: 25
+  findPlayerAngle: 90
   eyesTransform: {fileID: 3209286617708059334}
   rayLayerMask:
     serializedVersion: 2
@@ -323,46 +324,60 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.7
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
+      value: 1
+      inSlope: -2.4230871
+      outSlope: -2.4230871
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.083285734
+      outWeight: 0.33333334
     - serializedVersion: 3
-      time: 9.875061
-      value: 0.3294037
-      inSlope: -0.024993422
-      outSlope: -0.059399698
-      tangentMode: 1
-      weightedMode: 0
-      inWeight: 0.1220261
-      outWeight: 0.3254102
-    - serializedVersion: 3
-      time: 12.775269
-      value: 0.1
-      inSlope: -0.14540271
-      outSlope: -0.0138915265
-      tangentMode: 1
-      weightedMode: 0
-      inWeight: 0.14323682
-      outWeight: 0.095442705
-    - serializedVersion: 3
-      time: 25
-      value: 0
-      inSlope: -0.0024978572
-      outSlope: -0.0024978572
+      time: 0.29449645
+      value: 0.28640944
+      inSlope: -0.668927
+      outSlope: -0.668927
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.17329511
+      inWeight: 0.33333334
+      outWeight: 0.13517652
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -0.40596455
+      outSlope: -0.40596455
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   detectUnitTick: 0.3
+  alertLevel: 0.3
   headUP: {fileID: 6737611042678617358}
   debugDrawAimWalkingLine: 0
+--- !u!195 &3760384989905313728
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 367850427024814069}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &452791148409492869
 GameObject:
   m_ObjectHideFlags: 0
