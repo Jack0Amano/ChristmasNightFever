@@ -125,10 +125,11 @@ namespace Units.Icon
         /// Questionマークを指定したレベルで表示
         /// </summary>
         /// <param name="level">0~1で</param>
-        public void ShowQuestion(float level)
+        /// <param name="autoFade">表示後一定時間おいて直ぐに消す処理をするか </param>
+        public void ShowQuestion(float level, bool autoFade=false)
         {
 
-            if (Type == HeadUpIconType.Exculamation)
+            if (Type == HeadUpIconType.Exculamation || Type == HeadUpIconType.ShowForceQuestion)
                 return;
 
 
@@ -141,10 +142,21 @@ namespace Units.Icon
                 var size = IconSize;
                 seq.Append(questionPanel.transform.DOScale(size, 0.2f));
                 seq.Join(questionInnerPanel.transform.DOScale(size, 0.2f));
+                if (autoFade)
+                {
+                    Type = HeadUpIconType.ShowForceQuestion;
+                    seq.AppendInterval(2f);
+                    seq.Append(questionPanel.transform.DOScale(0, 0.2f));
+                }
                 seq.OnComplete(() =>
                 {
                     questionMaterial.SetFloat("_Level", level);
                     isFadeAnimating = false;
+                    if (autoFade)
+                    {
+                        Type = HeadUpIconType.None;
+                    }
+                        
                 });
                 seq.Play();
             }
@@ -208,6 +220,7 @@ namespace Units.Icon
     {
         None,
         Question,
-        Exculamation
+        Exculamation,
+        ShowForceQuestion
     }
 }

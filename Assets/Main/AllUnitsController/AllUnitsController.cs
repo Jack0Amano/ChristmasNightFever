@@ -183,7 +183,12 @@ namespace Units
         {
             if (e.Action == UnitAction.Goal)
             {
-                yield return new WaitForSeconds(3.0f);
+                // ‚·‚×‚Ä‚ÌEnemy‚Ì’ÇÕ‚â”­Œ©“x‚Ì‰ÁŽZ‚ðŽ~‚ß‚é
+                EnemyUnitControllers.ForEach(enemy => enemy.FinishToGameAsWin());
+                // Player‚ÌˆÚ“®‚ðŽ~‚ß‚é
+                PlayerUnitController.FinishToGameAsWin();
+
+                yield return new WaitForSeconds(4.0f);
                 gameManager.OnGameResult(true);
                 RemoveAllUnits();
             }

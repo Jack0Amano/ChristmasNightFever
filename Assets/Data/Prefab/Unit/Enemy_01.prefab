@@ -239,6 +239,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   detectUnitTick: 0.3
   alertLevel: 0.3
+  senceNoizeDistance: 25
   headUP: {fileID: 8664211922211396451}
   debugDrawAimWalkingLine: 0
 --- !u!195 &4529031026748656326

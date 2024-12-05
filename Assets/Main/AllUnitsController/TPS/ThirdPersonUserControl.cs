@@ -45,6 +45,15 @@ namespace Units.TPS
         private float vertical = 0;
 
         /// <summary>
+        /// 音を立てたときに呼び出されるAction
+        /// </summary>
+        internal Action makeNoiseAction;
+        /// <summary>
+        /// 音を立てている (アイテム使用中であるか)
+        /// </summary>
+        public bool IsMakingNoise { get; private set; } = false;
+
+        /// <summary>
         /// FollowCameraを横にずらしておくためのparent
         /// </summary>
         internal GameObject followCameraParent;
@@ -174,6 +183,13 @@ namespace Units.TPS
 
             if (IsTPSControllActive)
             {
+
+                if (!IsMakingNoise && UserController.MouseClickUp)
+                {
+                    StartCoroutine(MakeNoize());
+                    makeNoiseAction?.Invoke();
+                }
+
                 // read inputs
                 if (m_Character.IsFollowingWallMode)
                 {
@@ -452,7 +468,9 @@ namespace Units.TPS
         /// </summary>
         internal IEnumerator MakeNoize()
         {
+            IsMakingNoise = true;
             yield return StartCoroutine(m_Character.MakeNoize());
+            IsMakingNoise = false;
         }
 
         /// <summary>

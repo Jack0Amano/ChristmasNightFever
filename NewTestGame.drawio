@@ -1163,9 +1163,6 @@
         <mxCell id="jXujLD4FF0cwBqFkgT6Y-160" value="detectUnitTickが0.3秒で回っているから3" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="1660" y="6648" width="240" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="jXujLD4FF0cwBqFkgT6Y-161" value="Text" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
-          <mxGeometry x="1595" y="6808" width="50" height="30" as="geometry" />
-        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

@@ -808,10 +808,10 @@ namespace Units.TPS
         internal IEnumerator Killed()
         {
             const float duration = 0.3f;
-            m_Animator.SetLayerWeight(BaseLayer, 0, duration);
-            m_Animator.SetLayerWeight(UpperLayer, 0, duration);
-            m_Animator.SetLayerWeight(UpperLayerWithMask, 0, duration);
-            m_Animator.SetLayerWeight(OverlayLayer, 1, duration);
+            m_Animator.SetLayerWeight(BaseLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
+            m_Animator.SetLayerWeight(OverlayLayer, 1);
             m_Animator.SetBool("Death", true);
             yield return new WaitForSeconds(3.5f);
         }

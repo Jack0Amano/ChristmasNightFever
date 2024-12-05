@@ -102,7 +102,8 @@ public class GameManager : MonoBehaviour
         StartCoroutine(mainUIController.ShowResultPanel(CurrentStageId, doseWin));
         CurrentStageId = "";
         // stageObjectController‚Ì”jŠü
-        Addressables.ReleaseInstance(stageObjectControllerObj);
+        if (stageObjectControllerObj.IsValid())
+            Addressables.ReleaseInstance(stageObjectControllerObj);
     }
 
     /// <summary>

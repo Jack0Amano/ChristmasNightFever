@@ -30,6 +30,8 @@ namespace Units.AI
         [Tooltip("FindOutLevelがどれだけ異常になったら警戒に移行するか")]
         [SerializeField] private float alertLevel = 0.5f;
 
+        [SerializeField] private float senceNoizeDistance = 15f;
+
         [Tooltip("発見時のHeadUpIcon")]
         [SerializeField] private HeadUP headUP;
 
@@ -101,6 +103,25 @@ namespace Units.AI
             }
         }
 
+        /// <summary>
+        /// targetは発した物音を感知する
+        /// </summary>
+        /// <param name="target"></param>
+        internal void SenceNoiseAction(UnitController target)
+        {
+            var dist = Vector3.Distance(target.transform.position, this.transform.position);
+            if (dist < senceNoizeDistance)
+            {
+                // 物音を感知した
+                moveState = EnemyAIMoveState.SenseNoize;
+            }
+        }
+
+        internal void StopAI()
+        {
+           moveState = EnemyAIMoveState.Finish;
+        }
+
         #region Move with AI
         // navmeshagentを使って移動する場合は　NavMeshAgentのComponentを追加しておく
 
@@ -127,7 +148,6 @@ namespace Units.AI
         /// <returns></returns>
         private IEnumerator MoveToNextWay_MainRoutine(float delay=0)
         {
-            Print("MoveToNextWay_MainRoutine", FindOutLevel, moveState);
             moveState = EnemyAIMoveState.MoveMainRoutine;
             if (currentWayIndex + 1 >= way.Count )
             {
@@ -140,7 +160,6 @@ namespace Units.AI
             }
 
             currentWayIndex++;
-            print(currentWayIndex);
             var nextWay = way[currentWayIndex];
             // ここでFindOutLevelを監視しながら移動が完了するまで待つ
 
@@ -154,7 +173,6 @@ namespace Units.AI
                 var result = SituationChecker(moveState, startFindOutLevel);
                 if (!result)
                 {
-                    Print("MoveToNextWay  Situation false", FindOutLevel, moveState);
                     tpsController.CancelAutoMoving();
                     yield break;
                 }
@@ -172,7 +190,6 @@ namespace Units.AI
         /// <returns></returns>
         private IEnumerator StopAndFindAtCurrentPlace_MainRoutine(float delay=0)
         {
-            Print("StopAndFindAtCurrentPlace_MainRoutine", FindOutLevel, moveState);
             moveState = EnemyAIMoveState.IdleMainRoutine;
             var currentWay = way[currentWayIndex];
 
@@ -193,7 +210,6 @@ namespace Units.AI
                     {
                         // 状況が変わったため探索をキャンセル
                         // Stop find animation
-                        Print("StopAndFindAtCurrentPlace  Situation false", FindOutLevel, moveState);
                         yield break;
                     }
                     yield return new WaitForSeconds(0.1f);
@@ -217,7 +233,6 @@ namespace Units.AI
                     var result = SituationChecker(moveState, FindOutLevel);
                     if (!result)
                     {
-                        Print("StopAndFindAtCurrentPlace  Situation false", FindOutLevel, moveState);
                         // 状況が変わったため探索をキャンセル
                         yield break;
                     }
@@ -238,7 +253,6 @@ namespace Units.AI
         /// <returns></returns>
         private IEnumerator MoveToAlertPosition_SubRoutine(Vector3 position, float delay = 0)
         {
-            Print("MoveToAlertPosition_SubRoutine", FindOutLevel, moveState);
             moveState = EnemyAIMoveState.MoveToSearch;
             if (delay > 0)
             {
@@ -255,7 +269,6 @@ namespace Units.AI
                 var result = SituationChecker(moveState, startFindOutLevel);
                 if (!result)
                 {
-                    Print("MoveToAlertPosition  Situation false", FindOutLevel, moveState);
                     tpsController.CancelAutoMoving();
                     yield break;
                 }
@@ -274,7 +287,6 @@ namespace Units.AI
         /// <returns></returns>
         private IEnumerator SearchAlertArea_SubRoutine(float delay = 0)
         {
-            Print("SearchAlertArea_SubRoutine", FindOutLevel, moveState);
             moveState = EnemyAIMoveState.SearchingIdle;
             if (delay > 0)
             {
@@ -296,7 +308,6 @@ namespace Units.AI
                 {
                     // 状況が変わったため探索をキャンセル
                     // Stop find animation
-                    Print("SearchAlertArea_SubRoutine  Situation false", FindOutLevel, moveState);
                     yield break;
                 }
                 yield return new WaitForSeconds(0.1f);
@@ -311,7 +322,6 @@ namespace Units.AI
         /// </summary>
         private IEnumerator BackToRoutineWay_SubRoutine(float delay=0)
         {
-            print("BackToRoutineWay_SubRoutine");
             moveState = EnemyAIMoveState.BackToMainRoutine;
             if (delay > 0)
             {
@@ -319,6 +329,7 @@ namespace Units.AI
             }
 
             var currentWay = way[currentWayIndex];
+            print(currentWay.pointTransform.position);
             StartCoroutine(MoveTo(currentWay.pointTransform.position));
             var startFindOutLevel = FindOutLevel;
             yield return new WaitForSeconds(0.5f);
@@ -327,14 +338,30 @@ namespace Units.AI
                 var result = SituationChecker(moveState, startFindOutLevel);
                 if (!result)
                 {
-                    Print("BackToRoutineWay  Situation false", FindOutLevel, moveState);
                     tpsController.CancelAutoMoving();
                     yield break;
                 }
+                yield return new WaitForSeconds(0.1f);
             }
 
             // 何も発見できずroutineに戻ってきた
             StartCoroutine(StopAndFindAtCurrentPlace_MainRoutine());
+        }
+
+        /// <summary>
+        /// 物音を感知した際に割り込まれるサブルーチン MoveToAlertPosition_SubRoutineに自動で移行する
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator SenceNoise_SubRoutine()
+        {
+            // TODO ここで物音を感知するアニメーションを再生する
+            // 物音を感知するアニメーションが終わったらBackToMainRoutineに移行する
+            moveState = EnemyAIMoveState.MoveToSearch;
+            headUP.ShowQuestion(0, true);
+            yield return new WaitForSeconds(0.5f);
+            StartCoroutine(tpsController.RotateTo(playerUnitController.targetCollider.transform.position));
+
+            StartCoroutine(MoveToAlertPosition_SubRoutine(playerUnitController.targetCollider.transform.position, 1f));
         }
 
         #endregion
@@ -346,10 +373,24 @@ namespace Units.AI
         /// </summary>
         private bool SituationChecker(EnemyAIMoveState startState, float startFindOutLevel)
         {
+            // ルーチン施行前の割り込みを確認
             if (FindOutLevel == 1)
             {
                 // プレイヤーを見つけたためすべてのループを終了して一目散に駆け寄る
                 StartCoroutine(MoveTo(playerUnitController.targetCollider.transform.position));
+                return false;
+            }
+            else if (moveState == EnemyAIMoveState.Finish)
+            {
+                // システムからの終了処理
+                // Falseを返すとSituationCheckerを呼び出したコルーチンも終了し、
+                // 新たにAIの別コルーチンも開始されない
+                return false;
+            }
+            else if (moveState == EnemyAIMoveState.SenseNoize)
+            {
+                // 物音を感知した
+                StartCoroutine(SenceNoise_SubRoutine());
                 return false;
             }
 
@@ -386,6 +427,7 @@ namespace Units.AI
                             // 帰ろうとしたのに警戒状態になった
                             StartCoroutine(MoveToAlertPosition_SubRoutine(moveTo, 2));
                             return false;
+                            
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -503,7 +545,7 @@ namespace Units.AI
         /// </summary>
         private void TryFindPlayer()
         {
-            if (FindOutLevel <= 1)
+            if (FindOutLevel <= 1 && moveState != EnemyAIMoveState.Finish)
             {
                 var dist = GetDistanceIfPlayerInSight();
                 // DOIT deltalevelでalterLevelを超えている場合これが減っていく状態では5秒alterLevelを保持
@@ -610,6 +652,10 @@ namespace Units.AI
         /// <summary>
         /// 不審な場所の探索から帰ってきている
         /// </summary>
-        BackToMainRoutine
+        BackToMainRoutine,
+        /// <summary>
+        /// ノイズを耳にした
+        /// </summary>
+        SenseNoize,
     }
 }

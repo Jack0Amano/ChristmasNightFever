@@ -38,12 +38,12 @@ namespace Units
         /// <summary>
         /// PlayerのUnitControllerを設定する Playerの検知などを行うため敵側に必要
         /// </summary>
-        public UnitController PlayerUnitController { set => enemyAI.playerUnitController = value; get => enemyAI.playerUnitController;}
+        public UnitController PlayerUnitController { set => EnemyAI.playerUnitController = value; get => EnemyAI.playerUnitController;}
 
         /// <summary>
         /// このUnitが敵の場合、そのAIを設定する
         /// </summary>
-        EnemyAI enemyAI;
+        public EnemyAI EnemyAI { private set; get; }
 
 
         private void Awake()
@@ -57,6 +57,7 @@ namespace Units
                 TPSController.IsTPSControllActive = true;
                 StartCoroutine(cameraUserController.ChangeModeFollowTarget(TPSController));
             }
+            TPSController.makeNoiseAction +=  MakeNoizeEvent;
         }
 
         // Start is called before the first frame update
@@ -67,14 +68,6 @@ namespace Units
         // Update is called once per frame
         void Update()
         {
-            if (UserController.MouseClickDown)
-            {
-                StartCoroutine(TPSController.Killed());
-            }
-            else if (UserController.MouseRightDown)
-            {
-                TPSController.ResetKilled();
-            }
         }
 
         private void FixedUpdate()
@@ -86,7 +79,7 @@ namespace Units
         /// </summary>
         internal void StartToGame()
         {
-            enemyAI?.NavigationAIEntryPoint();
+            EnemyAI?.NavigationAIEntryPoint();
         }
 
         /// <summary>
@@ -95,18 +88,27 @@ namespace Units
         /// <param name="way">AIが辿るポイントのリスト</param>
         internal void SetUnitAsEnemy(List<StageObjects.PointAndStopTime> way)
         {
-            enemyAI = GetComponent<EnemyAI>();
-            enemyAI.playerUnitController = PlayerUnitController;
-            enemyAI.tpsController = TPSController;
-            enemyAI.OnFoundPlayer += (sender, e) => FoundYou();
-            enemyAI.way = way;
+            EnemyAI = GetComponent<EnemyAI>();
+            EnemyAI.playerUnitController = PlayerUnitController;
+            EnemyAI.tpsController = TPSController;
+            EnemyAI.OnFoundPlayer += (sender, e) => FoundYou();
+            EnemyAI.way = way;
+        }
+
+        /// <summary>
+        /// 勝利してゲームが終了したことを通知する
+        /// </summary>
+        internal void FinishToGameAsWin()
+        {
+            EnemyAI?.StopAI();
+            TPSController.IsTPSControllActive = false;
         }
 
         #region アニメーションなどを含むアクションを起こす
         /// <summary>
         /// ユニットが物音を立てる
         /// </summary>
-        internal void MakeNoize()
+         private void MakeNoizeEvent()
         {
             // DOIT ThirdPersonCharacterでアニメーションを再生する
             OnUnitAction?.Invoke(this, new UnitActionEventArgs(this, UnitAction.MakeNoize));
@@ -117,8 +119,7 @@ namespace Units
         /// </summary>
         internal void SenseNoize(UnitController target)
         {
-            // DOIT ThirdPersonCharacterでアニメーションを再生し、AIに通知する
-            
+            EnemyAI.SenceNoiseAction(target);
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace Units
             // カメラも倒れた者を撮る感じのアニメーションに変更
             StartCoroutine(TPSController.Killed());
 
-            yield return new WaitForSeconds(3.0f);
+            yield return new WaitForSeconds(4.0f);
 
             OnUnitAction?.Invoke(this, new UnitActionEventArgs(this, UnitAction.Die));
         }
