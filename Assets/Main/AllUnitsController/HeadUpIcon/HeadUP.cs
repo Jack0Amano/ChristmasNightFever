@@ -142,21 +142,23 @@ namespace Units.Icon
                 var size = IconSize;
                 seq.Append(questionPanel.transform.DOScale(size, 0.2f));
                 seq.Join(questionInnerPanel.transform.DOScale(size, 0.2f));
-                if (autoFade)
-                {
-                    Type = HeadUpIconType.ShowForceQuestion;
-                    seq.AppendInterval(2f);
-                    seq.Append(questionPanel.transform.DOScale(0, 0.2f));
-                }
                 seq.OnComplete(() =>
                 {
                     questionMaterial.SetFloat("_Level", level);
                     isFadeAnimating = false;
                     if (autoFade)
                     {
-                        Type = HeadUpIconType.None;
+                        isFadeAnimating = true;
+                        questionPanel.transform.DOScale(0, 0.2f)
+                        .SetDelay(4)
+                        .OnComplete(() =>
+                        {
+                            isFadeAnimating = false;
+                            Type = HeadUpIconType.None;
+                        });
+
                     }
-                        
+
                 });
                 seq.Play();
             }
@@ -164,7 +166,8 @@ namespace Units.Icon
             {
                 questionMaterial.SetFloat("_Level", level);
             }
-            Type = HeadUpIconType.Question;
+
+            Type = autoFade ? HeadUpIconType.ShowForceQuestion : HeadUpIconType.Question;
         }
 
         /// <summary>
@@ -196,8 +199,10 @@ namespace Units.Icon
         /// </summary>
         public void Hide()
         {
-            if (Type == HeadUpIconType.None)
+            if (Type == HeadUpIconType.None || Type == HeadUpIconType.ShowForceQuestion)
                 return;
+
+            print(Type);
 
             questionMaterial.SetFloat("_Level", 0);
             var seq = DOTween.Sequence();

@@ -365,8 +365,9 @@ namespace Units.TPS
                     var dy = Vector3.Dot(transform.forward, worldDeltaPosition);
                     Vector2 deltaPosition = new Vector2(dx, dy);
 
-                    float smooth = Mathf.Min(1.0f, Time.deltaTime / 0.05f);
+                    float smooth = Mathf.Min(1.0f, Time.deltaTime / 0.001f);
                     smoothDeltaPosition = Vector2.Lerp(smoothDeltaPosition, deltaPosition, smooth);
+
 
                     if (Time.deltaTime > 1e-5f)
                         velocity = smoothDeltaPosition / Time.deltaTime;

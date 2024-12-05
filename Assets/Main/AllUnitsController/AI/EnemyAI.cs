@@ -132,7 +132,7 @@ namespace Units.AI
         {
 
            // ここでAIのループを開始する
-            StartCoroutine(MoveToNextWay_MainRoutine());
+            StartCoroutine(StopAndFindAtCurrentPlace_MainRoutine());
         }
 
         #region Type routine
@@ -294,7 +294,7 @@ namespace Units.AI
             }
 
             // 何秒で探索を終了するか
-            const float stopSearchTime = 5f;
+            const float stopSearchTime = 8f;
 
             // TODO 探索アニメーションを再生する
             // 探索が完了したらBackSubRoutineに移行する
@@ -359,7 +359,7 @@ namespace Units.AI
             moveState = EnemyAIMoveState.MoveToSearch;
             headUP.ShowQuestion(0, true);
             yield return new WaitForSeconds(0.5f);
-            StartCoroutine(tpsController.RotateTo(playerUnitController.targetCollider.transform.position));
+            yield return StartCoroutine(tpsController.RotateTo(playerUnitController.targetCollider.transform.position));
 
             StartCoroutine(MoveToAlertPosition_SubRoutine(playerUnitController.targetCollider.transform.position, 1f));
         }

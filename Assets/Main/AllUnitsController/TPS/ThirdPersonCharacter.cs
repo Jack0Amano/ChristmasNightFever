@@ -384,6 +384,8 @@ namespace Units.TPS
         /// <param name="speed">0.5(歩行)~1(走る)</param>
         public void WorldMove(Vector2 move, float speed)
         {
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+
             move.Normalize();
             var _speed = speed * 10f;
             var x = (float)Math.Ceiling(move.x * _speed) / 10f;
