@@ -26,8 +26,10 @@ namespace Units.TPS
         [SerializeField] internal float OverShoulderCameraMaxXRotation = 1.0f;
         [SerializeField] internal float OverShoulderCameraMinXRotation = 0;
 
+
         [Header("肩越しの少し離れた箇所のカメラ")]
         [SerializeField] internal CinemachineVirtualCamera OverShoulderCameraFar;
+
 
 
         internal Transform OverShoulderCameraParent;
@@ -39,7 +41,6 @@ namespace Units.TPS
         private ThirdPersonCharacter m_Character; // A reference to the ThirdPersonCharacter on the object
         private Vector3 m_CamForward;             // The current forward direction of the camera
         private Vector3 m_Move;
-        private bool dash = false;
 
         private float horizontal = 0;
         private float vertical = 0;
@@ -57,6 +58,11 @@ namespace Units.TPS
         /// FollowCameraを横にずらしておくためのparent
         /// </summary>
         internal GameObject followCameraParent;
+
+        /// <summary>
+        /// 走っているかどうか
+        /// </summary>
+        public bool IsRunning { private set; get; }
 
         /// <summary>
         /// Userに関連付けられているcinemachineVirtualCamera
@@ -169,7 +175,6 @@ namespace Units.TPS
         {
             // get the third person character ( this should never be null due to require component )
             followCameraTransform = followCamera.transform;
-            print(followCamera);
         } 
 
         // Fixed update is called in sync with physics
@@ -210,7 +215,8 @@ namespace Units.TPS
                     m_CamForward = Vector3.Scale(forward, new Vector3(1, 0, 1)).normalized;
                     var right = transform.parent.transform.TransformDirection(followCameraTransform.right);
                     m_Move = vertical * m_CamForward + horizontal * right;
-                    m_Character.Move(m_Move, false, false, UserController.KeyCodeDash);
+                    IsRunning = UserController.KeyCodeDash;
+                    m_Character.Move(m_Move, false, false, IsRunning);
                 }
             }
             else if (isMouseHandleMode)
@@ -221,6 +227,7 @@ namespace Units.TPS
             else
             {
                 IsMoving = false;
+                IsRunning = false;
             }
 
             // walk speed multiplier
@@ -492,6 +499,16 @@ namespace Units.TPS
         {
 
            m_Character.ResetKilled();
+        }
+
+        /// <summary>
+        /// キャラクターが勝利したときのモーション 自動で元に戻る 他のレイヤーに優先して行われる
+        /// </summary>
+        /// <returns></returns>
+        internal IEnumerator Victory()
+        {
+
+            yield return StartCoroutine( m_Character.Victory());
         }
 
         #endregion

@@ -447,7 +447,6 @@ namespace Units.TPS
             {
                 m_Animator.SetFloat("Forward", m_ForwardAmount, 0.1f, Time.deltaTime);
                 m_Animator.SetFloat("Turn", m_TurnAmount, 0.1f, Time.deltaTime);
-                m_Animator.SetBool("Crouch", m_Crouching);
             }
             else
             {
@@ -829,7 +828,26 @@ namespace Units.TPS
             m_Animator.SetLayerWeight(OverlayLayer, 0);
             m_Animator.SetBool("Death", false);
         }
-        
+
+        /// <summary>
+        /// 勝利モーション　すべてのモーションを停止しWinモーションを再生
+        /// </summary>
+        internal IEnumerator Victory()
+        {
+            m_Animator.SetLayerWeight(BaseLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
+            m_Animator.SetLayerWeight(OverlayLayer, 1);
+            m_Animator.SetTrigger("Victory");
+            yield return new WaitForSeconds(4.5f);
+            // すべてのモーションをリセット
+            m_Animator.SetLayerWeight(BaseLayer, 1);
+            m_Animator.SetLayerWeight(UpperLayer, 0);
+            m_Animator.SetLayerWeight(UpperLayerWithMask,0);
+            m_Animator.SetLayerWeight(OverlayLayer, 0);
+
+        }
+
         #endregion
     }
 

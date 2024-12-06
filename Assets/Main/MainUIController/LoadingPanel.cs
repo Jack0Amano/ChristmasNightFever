@@ -53,5 +53,15 @@ namespace MainUI
                 gameObject.SetActive(false);
             }
         }
+
+        /// <summary>
+        /// 指定された秒数だけパネルを表示する
+        /// </summary>
+        internal IEnumerator ShowPanelForSeconds(float duration)
+        {
+            ShowPanel(0.5f);
+            yield return new WaitForSeconds(duration);
+            HidePanel(true);
+        }
     }
 }

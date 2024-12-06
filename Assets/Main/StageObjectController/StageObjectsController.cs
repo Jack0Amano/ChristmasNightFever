@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine.EventSystems;
 using System;
 using Units;
+using Cinemachine;
 
 namespace StageObjects
 {
@@ -18,6 +19,12 @@ namespace StageObjects
         [SerializeField] GameObject checkPointsParent;
         [Tooltip("Enemyの移動経路を示すEditorways")]
         [SerializeField] public EditorWays editorWays;
+
+        [Tooltip("勝利時にユーザーの方に向けて撮られるバーチャルカメラ")]
+        [SerializeField] public CinemachineVirtualCamera winVirtualCamera;
+
+        [Tooltip("負けた際にのResult画面に使われるバーチャルカメラ")]
+        [SerializeField] public CinemachineVirtualCamera loseVirtualCamera;
 
         /// <summary>
         /// Unitがゴールに到達したときにAllUnitsControllerに通知するイベント
@@ -48,6 +55,7 @@ namespace StageObjects
 
         private void Awake()
         {
+            
             CheckPoints = new List<CheckPoint>(checkPointsParent.GetComponentsInChildren<CheckPoint>());
             PlayerSpawnPoint = CheckPoints.Find(cp => cp.checkPointType == CheckPointType.PlayerSpawn);
             EnemySpawnPoints = editorWays.ways.ConvertAll(w => w.pointsParent.GetChild(0));
@@ -58,6 +66,7 @@ namespace StageObjects
         // Start is called before the first frame update
         void Start()
         {
+            winVirtualCamera.Priority = -1;
             GoalCheckPoint.NortifyTrigger.OnTriggerEnterAction += (c =>
             {
                 var unitObject = c.gameObject;

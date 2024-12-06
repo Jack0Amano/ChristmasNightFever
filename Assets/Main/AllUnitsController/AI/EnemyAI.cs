@@ -128,9 +128,8 @@ namespace Units.AI
         /// <summary>
         /// AIの移動を開始する
         /// </summary>
-        public void NavigationAIEntryPoint()
+        public void StartAI()
         {
-
            // ここでAIのループを開始する
             StartCoroutine(StopAndFindAtCurrentPlace_MainRoutine());
         }
@@ -294,7 +293,7 @@ namespace Units.AI
             }
 
             // 何秒で探索を終了するか
-            const float stopSearchTime = 8f;
+            const float stopSearchTime = 10f;
 
             // TODO 探索アニメーションを再生する
             // 探索が完了したらBackSubRoutineに移行する
@@ -357,6 +356,7 @@ namespace Units.AI
             // TODO ここで物音を感知するアニメーションを再生する
             // 物音を感知するアニメーションが終わったらBackToMainRoutineに移行する
             moveState = EnemyAIMoveState.MoveToSearch;
+            yield return new WaitForSeconds(1f);
             headUP.ShowQuestion(0, true);
             yield return new WaitForSeconds(0.5f);
             yield return StartCoroutine(tpsController.RotateTo(playerUnitController.targetCollider.transform.position));
@@ -530,7 +530,6 @@ namespace Units.AI
             // navMeshAgent.SetDestination(location);
 
             location.y = this.transform.position.y;
-            print(navMeshAgent);
             yield return StartCoroutine(tpsController.AutoMove(location, navMeshAgent, debugDrawAimWalkingLine));
             tpsController.CancelAutoMoving();
             //navMeshAgent.isStopped = true;
@@ -545,7 +544,7 @@ namespace Units.AI
         /// </summary>
         private void TryFindPlayer()
         {
-            if (FindOutLevel <= 1 && moveState != EnemyAIMoveState.Finish)
+            if (FindOutLevel < 1 && moveState != EnemyAIMoveState.Finish)
             {
                 var dist = GetDistanceIfPlayerInSight();
                 // DOIT deltalevelでalterLevelを超えている場合これが減っていく状態では5秒alterLevelを保持

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
+using Cinemachine;
+using TMPro;
 
 namespace MainUI
 {
@@ -14,7 +16,7 @@ namespace MainUI
     {
         [SerializeField] internal Button retryButton;
         [SerializeField] Button exitButton;
-
+        [SerializeField] private TextMeshProUGUI resultLabel;
 
         Image backgroundImage;
 
@@ -25,6 +27,7 @@ namespace MainUI
             {
                 GameManager.Instance.EndGame();
             });
+            resultLabel.text = "";
         }
 
         // Start is called before the first frame update
@@ -45,6 +48,16 @@ namespace MainUI
         internal void ShowPanel(string stageID, bool doesWin)
         {
             gameObject.SetActive(true);
+            if (doesWin)
+            {
+                resultLabel.text = "èüóò";
+                backgroundImage.DOColor(Color.green, 1);
+            }
+            else
+            {
+                resultLabel.text = "ïâÇØ";
+                backgroundImage.DOColor(Color.red, 1);
+            }
         }
 
         /// <summary>

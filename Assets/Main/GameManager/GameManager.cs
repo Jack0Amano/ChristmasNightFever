@@ -7,6 +7,12 @@ using MainUI;
 using Units;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using static Utility;
+using UnityEngine.AzureSky;
+
+
+
+// 開発速度を一番に考えてそれ以外は軽視したためシングルトンに頼り切った流れができている
+// 別に進行状況を管理するクラスを作ってそこに処理を移す
 
 public class GameManager : MonoBehaviour
 {
@@ -14,7 +20,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private MainUIController mainUIController;
     [Tooltip("AllUnitsControllerを設定する")]
     [SerializeField] private AllUnitsController allUnitsController;
-
+    
 
     private AsyncOperationHandle<GameObject> stageObjectControllerObj;
 
@@ -87,8 +93,26 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void OnUnitsLoaded()
     {
+        ShowMainMessagesPanel();
+    }
+
+    /// <summary>
+    /// MainMessagesPanelの表示
+    /// </summary>
+    private void ShowMainMessagesPanel()
+    {
+        mainUIController.ShowMessagesPanel();
+    }
+
+    /// <summary>
+    /// MessagePanelが終了 AllUnitCOntrollerに伝えてゲーム開始
+    /// </summary>
+    public void OnMessagePanelClosed()
+    {
+
         CurrentGameState = GameState.Playing;
-        UserController.enableCursor = false;
+        mainUIController.OnMessagePanelClosed();
+        allUnitsController.OnMessagePanelClosed();
     }
 
     /// <summary>

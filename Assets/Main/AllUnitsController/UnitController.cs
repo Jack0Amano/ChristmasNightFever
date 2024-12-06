@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Units.AI;
 using Units.TPS;
 using UnityEngine;
+using Cinemachine;
 using static Utility;
 
 namespace Units
@@ -40,15 +41,20 @@ namespace Units
         /// </summary>
         public UnitController PlayerUnitController { set => EnemyAI.playerUnitController = value; get => EnemyAI.playerUnitController;}
 
+        public SEController SEController { private set; get; }
+
         /// <summary>
         /// このUnitが敵の場合、そのAIを設定する
         /// </summary>
         public EnemyAI EnemyAI { private set; get; }
 
+        private AudioSource audioSource;
+
 
         private void Awake()
         {
             TPSController = GetComponent<ThirdPersonUserControl>();
+            audioSource = GetComponent<AudioSource>();
 
             if (cameraUserController != null)
             {
@@ -58,6 +64,7 @@ namespace Units
                 StartCoroutine(cameraUserController.ChangeModeFollowTarget(TPSController));
             }
             TPSController.makeNoiseAction +=  MakeNoizeEvent;
+            SEController = GetComponent<SEController>();
         }
 
         // Start is called before the first frame update
@@ -79,7 +86,7 @@ namespace Units
         /// </summary>
         internal void StartToGame()
         {
-            EnemyAI?.NavigationAIEntryPoint();
+            EnemyAI?.StartAI();
         }
 
         /// <summary>
@@ -91,17 +98,29 @@ namespace Units
             EnemyAI = GetComponent<EnemyAI>();
             EnemyAI.playerUnitController = PlayerUnitController;
             EnemyAI.tpsController = TPSController;
-            EnemyAI.OnFoundPlayer += (sender, e) => FoundYou();
+            EnemyAI.OnFoundPlayer += (sender, e) => FoundYou(this);
             EnemyAI.way = way;
+            TPSController.IsTPSControllActive = false;
         }
 
         /// <summary>
         /// 勝利してゲームが終了したことを通知する
         /// </summary>
-        internal void FinishToGameAsWin()
+        internal void FinishToGameAsWin(CameraUserController cameraUserController, CinemachineVirtualCamera winVirtualCamera)
         {
-            EnemyAI?.StopAI();
-            TPSController.IsTPSControllActive = false;
+            if (unitType == UnitType.Player)
+            {
+                TPSController.IsTPSControllActive = false;
+                winVirtualCamera.Priority = 1100;
+                winVirtualCamera.LookAt = transform;
+                StartCoroutine(TPSController.Victory());
+                var bgmCon = cameraUserController.GetComponent<BGMController>();
+                bgmCon.PlayWinBGM();
+            }
+            else
+            {
+                EnemyAI?.StopAI();
+            }
         }
 
         #region アニメーションなどを含むアクションを起こす
@@ -141,9 +160,26 @@ namespace Units
         /// <summary>
         /// Enemyがプレイヤーを見つけた これはAllUnitsControllerからすべてのEnemyに共有され Player側にはDieが通知される
         /// </summary>
-        internal void FoundYou()
+        internal void FoundYou(UnitController sender)
         {
-            OnUnitAction?.Invoke(this, new UnitActionEventArgs(this, UnitAction.FindYou));
+            Print(sender, this);
+
+            IEnumerator _WinVoice()
+            {
+                yield return new WaitForSeconds(1.5f);
+                SEController.EnemyWinVoiceSE();
+            }
+
+            if (sender.gameObject == this.gameObject)
+            {
+                SEController.EnemyrWhistleSE();
+                OnUnitAction?.Invoke(this, new UnitActionEventArgs(this, UnitAction.FindYou));
+            }
+            else
+            {
+                EnemyAI?.StopAI();
+                StartCoroutine(_WinVoice());
+            }
         }
         #endregion
     }

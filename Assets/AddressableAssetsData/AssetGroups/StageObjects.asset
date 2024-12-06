@@ -22,6 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ce7e3bbab8b41c74d8e7d5dbbbc85a3c
+    m_Address: Santa_Clause_Die
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 82af391cefef34247a7015ab06a2cbf3, type: 2}
   m_SchemaSet:

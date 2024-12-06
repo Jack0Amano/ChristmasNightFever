@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Cinemachine;
+using StageObjects;
 
 // StageIDがInspector上で設定されており、難易度などがあればそれらのデータと紐づけるためのデータの参照元が必要
 
@@ -19,8 +21,16 @@ namespace MainUI
         [SerializeField] LoadingPanel loadingPanel;
         [Tooltip("リザルト画面のパネル")]
         [SerializeField] ResultPanel resultPanel;
+        [Tooltip("メッセージを表示するパネル")]
+        [SerializeField] MessagePanel messagePanel;
+
+        [Tooltip("メッセージとStart画面Win画面の際にを表示するバーチャルカメラ")]
+        [SerializeField] CinemachineVirtualCamera messageVirtualCamera;
+        [Tooltip("Lose画面の際にを表示するバーチャルカメラ")]
+        [SerializeField] CinemachineVirtualCamera loseResultVirtualCamera;
 
         GameManager gameManager;
+
 
         // Start is called before the first frame update
         void Start()
@@ -65,6 +75,7 @@ namespace MainUI
             startPanel.ShowPanel();
             loadingPanel.HidePanel(false);
             resultPanel.HidePanel();
+            messageVirtualCamera.Priority = 10;
         }
 
         /// <summary>
@@ -78,8 +89,17 @@ namespace MainUI
             yield return new WaitForSeconds(duration);
             startPanel.HidePanel();
             resultPanel.HidePanel();
-            yield return new WaitUntil(() => gameManager.CurrentGameState == GameState.Playing);
+            loseResultVirtualCamera.Priority = -1;
+        }
+
+        /// <summary>
+        /// メインメッセージパネルを表示する
+        /// </summary>
+        /// <returns></returns>
+        internal void ShowMessagesPanel()
+        {
             loadingPanel.HidePanel(true);
+            messagePanel.ShowPanel();
         }
 
         /// <summary>
@@ -97,7 +117,32 @@ namespace MainUI
                 LoadStage(doneStageID);
             });
             loadingPanel.HidePanel(true);
+
+            if (doesWin)
+            {
+                messageVirtualCamera.Priority = 10;
+            }
+            else
+            {
+                loseResultVirtualCamera.Priority = 10;
+            }
         
+        }
+
+        /// <summary>
+        /// MessagePanelが終了
+        /// </summary>
+        public void OnMessagePanelClosed()
+        {
+            IEnumerator Show()
+            {
+                yield return new WaitForSeconds(1f);
+                UserController.enableCursor = false;
+                messageVirtualCamera.Priority = -1;
+            }
+
+            StartCoroutine(Show());
+            StartCoroutine( loadingPanel.ShowPanelForSeconds(1.5f));
         }
     }
 

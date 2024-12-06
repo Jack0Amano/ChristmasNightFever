@@ -34,6 +34,7 @@ ExportedObj/
 *.svd
 *.pdb
 *.opendb
+*.asset
 
 
 *.fbx
@@ -50,3 +51,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+*.mp3
+*.wav
+.DS_Store

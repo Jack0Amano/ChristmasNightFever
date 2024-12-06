@@ -21,6 +21,8 @@ namespace Units
 
         List<AsyncOperationHandle<GameObject>> asyncOperationHandles = new List<AsyncOperationHandle<GameObject>>();
 
+        StageObjectsController stageObjectsController;
+
         /// <summary>
         /// PlayerがScene上に設置されている場合このUnitController
         /// </summary>
@@ -55,6 +57,7 @@ namespace Units
 
             IEnumerator _SpawnUnit(StageObjectsController stageObjectsController)
             {
+                this.stageObjectsController = stageObjectsController;
                 // Enemy Unitの設置をStageObjectControllerのEditWay index=0から取得
                 // Player Unitの設置をStageObjectControllerのチェックポイントから取得
                 var spawnCorutines = stageObjectsController.EnemyWays.ConvertAll(way =>
@@ -70,7 +73,11 @@ namespace Units
                     yield return corutine;
                 }
 
-                EnemyUnitControllers.ForEach(enemy => enemy.PlayerUnitController = PlayerUnitController);
+                EnemyUnitControllers.ForEach(enemy =>
+                {
+                    enemy.EnemyAI.StopAI();
+                    enemy.PlayerUnitController = PlayerUnitController;
+                });
 
                 OnUnitsLoaded();
             }
@@ -91,6 +98,7 @@ namespace Units
             var gameobject = handle.Result;
             gameobject.transform.SetParent(this.transform);
             var unitController = gameobject.GetComponent<UnitController>();
+            unitController.TPSController.IsTPSControllActive = false;
             if (unitType == UnitType.Player)
             {
                 PlayerUnitController = unitController;
@@ -115,12 +123,29 @@ namespace Units
             }
 
             gameManager.OnUnitsLoaded();
-            // CameraUserControllerにPlayerのTPSConを渡して、これにカメラをFollowさせる
-            StartCoroutine(cameraUserController.ChangeModeFollowTarget(PlayerUnitController.TPSController));
-
-            PlayerUnitController.StartToGame();
-            EnemyUnitControllers.ForEach(enemy => enemy.StartToGame());
         }
+
+        /// <summary>
+        /// MainMessagesの表示が終わった際に呼び出し ここから自由に操作可能になる
+        /// </summary>
+        public void OnMessagePanelClosed()
+        {
+            IEnumerator _OnDelayActions()
+            {
+
+               yield return new WaitForSeconds(0.5f);
+                // CameraUserControllerにPlayerのTPSConを渡して、これにカメラをFollowさせる
+                PlayerUnitController.TPSController.followCamera.Priority = 1;
+                PlayerUnitController.TPSController.IsTPSControllActive = true;
+                StartCoroutine(cameraUserController.ChangeModeFollowTarget(PlayerUnitController.TPSController));
+
+                PlayerUnitController.StartToGame();
+                EnemyUnitControllers.ForEach(enemy => enemy.StartToGame());
+            }
+            StartCoroutine(_OnDelayActions());
+
+        }
+
 
         /// <summary>
         /// Scene上に設置されているすべてのUnitを除去する
@@ -151,7 +176,7 @@ namespace Units
                 EnemyUnitControllers.ForEach(enemy => 
                 {
                     if (enemy != e.ActionFrom)
-                        enemy.FoundYou();
+                        enemy.FoundYou(e.ActionFrom);
                 });
                 StartCoroutine(PlayerUnitController.Killed());
             }
@@ -167,8 +192,19 @@ namespace Units
             }
             else if (e.Action == UnitAction.MakeNoize)
             {
-                /// 物音を立てた場合、すべてのEnemyにSenseNoizeを渡す Enemy側で物音を感知するかどうか判断する
-                EnemyUnitControllers.ForEach(enemy => enemy.SenseNoize(PlayerUnitController));
+                /// 物音を立てた場合、直線距離で最も近いEnemyに物音を感知させる
+                float minDistance = float.MaxValue;
+                UnitController nearEnemy = null;
+                foreach (var enemy in EnemyUnitControllers)
+                {
+                    var distance = Vector3.Distance(enemy.transform.position, e.ActionFrom.transform.position);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        nearEnemy = enemy;
+                    }
+                }
+                nearEnemy?.SenseNoize(e.ActionFrom);
             }
             
         }
@@ -183,10 +219,11 @@ namespace Units
         {
             if (e.Action == UnitAction.Goal)
             {
+                var stageObjCon = sender as StageObjectsController;
                 // すべてのEnemyの追跡や発見度の加算を止める
-                EnemyUnitControllers.ForEach(enemy => enemy.FinishToGameAsWin());
+                EnemyUnitControllers.ForEach(enemy => enemy.FinishToGameAsWin(cameraUserController, stageObjCon.winVirtualCamera));
                 // Playerの移動を止める
-                PlayerUnitController.FinishToGameAsWin();
+                PlayerUnitController.FinishToGameAsWin(cameraUserController, stageObjCon.winVirtualCamera);
 
                 yield return new WaitForSeconds(4.0f);
                 gameManager.OnGameResult(true);
