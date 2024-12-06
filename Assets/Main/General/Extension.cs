@@ -1660,7 +1660,7 @@ public static class ScriptableObjectExtensions
     public static T ObjectDeepCopy<T>(this T obj) where T : ScriptableObject
     {
         T copy = ScriptableObject.CreateInstance<T>();
-        EditorUtility.CopySerialized(obj, copy);
+        //EditorUtility.CopySerialized(obj, copy);
         return copy;
     }
 }

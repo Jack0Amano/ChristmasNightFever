@@ -30,6 +30,8 @@ namespace Units.TPS
         [Header("肩越しの少し離れた箇所のカメラ")]
         [SerializeField] internal CinemachineVirtualCamera OverShoulderCameraFar;
 
+        [SerializeField] GameObject handbell;
+
 
 
         internal Transform OverShoulderCameraParent;
@@ -173,6 +175,9 @@ namespace Units.TPS
 
         private void Start()
         {
+            if (handbell != null)
+                handbell.SetActive(false);
+
             // get the third person character ( this should never be null due to require component )
             followCameraTransform = followCamera.transform;
         } 
@@ -360,7 +365,7 @@ namespace Units.TPS
                 }
             }
 
-            const float TimeOver = 5000f;
+            const float TimeOver = 10000f;
             for (var i = 1; i < corners.Count; i++)
             {
                 var startTime = DateTime.Now;
@@ -477,7 +482,9 @@ namespace Units.TPS
         internal IEnumerator MakeNoize()
         {
             IsMakingNoise = true;
+            handbell?.SetActive(true);
             yield return StartCoroutine(m_Character.MakeNoize());
+            handbell?.SetActive(false);
             IsMakingNoise = false;
         }
 

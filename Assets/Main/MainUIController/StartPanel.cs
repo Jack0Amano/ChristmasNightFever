@@ -20,6 +20,8 @@ namespace MainUI
         [Tooltip("ゲームを終了するボタン")]
         [SerializeField] private Button exitButton;
 
+        CanvasGroup canvasGroup;
+
 
         private void Awake()
         {
@@ -39,6 +41,7 @@ namespace MainUI
         // Start is called before the first frame update
         void Start()
         {
+            canvasGroup = GetComponent<CanvasGroup>();
         }
 
         // Update is called once per frame
@@ -61,7 +64,12 @@ namespace MainUI
         /// </summary>
         internal void HidePanel()
         {
-            gameObject.SetActive(false);
+            canvasGroup.DOFade(0, 0.5f).OnComplete(() => {
+                canvasGroup.alpha = 1;
+                gameObject.SetActive(false);
+                }
+            );
+
         }
     }
 
