@@ -303,6 +303,7 @@ MonoBehaviour:
   OverShoulderCameraMaxXRotation: 1
   OverShoulderCameraMinXRotation: 0
   OverShoulderCameraFar: {fileID: 0}
+  handbell: {fileID: 0}
 --- !u!114 &441455746459995026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -688,7 +689,7 @@ Transform:
   m_GameObject: {fileID: 1213117821725810059}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.32, z: 0.456}
+  m_LocalPosition: {x: -0, y: 0.32, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

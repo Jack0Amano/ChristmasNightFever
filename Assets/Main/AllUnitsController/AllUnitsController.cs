@@ -63,9 +63,9 @@ namespace Units
                 var spawnCorutines = stageObjectsController.EnemyWays.ConvertAll(way =>
                 {
                     var enemyID = enemyUnitIDList[Random.Range(0, enemyUnitIDList.Count)];
-                    return StartCoroutine(SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointAndStops));
+                    return StartCoroutine(SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointsParent.name, way.pointAndStops));
                 });
-                spawnCorutines.Add(StartCoroutine(SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player)));
+                spawnCorutines.Add(StartCoroutine(SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player, "Player")));
 
                 // ‚·‚×‚Ä‚ÌUnit‚Ìİ’u‚ªI‚í‚é‚Ü‚Å‘Ò‚Â
                 foreach (var corutine in spawnCorutines)
@@ -90,13 +90,14 @@ namespace Units
         /// <param name="spawnPoint"></param>
         /// <param name="way">Unity‚ªEnemy‚ÌÛ‚É‚ÍˆÚ“®Œo˜H‚Ìİ’è‚ğ“n‚·</param>
         /// <returns></returns>
-        IEnumerator SpawnUnit(Transform spawnPoint, string id, UnitType unitType, List<PointAndStopTime> way=null)
+        IEnumerator SpawnUnit(Transform spawnPoint, string id, UnitType unitType, string name, List<PointAndStopTime> way=null)
         {
             var handle = Addressables.InstantiateAsync(id, spawnPoint.position, spawnPoint.rotation);
             asyncOperationHandles.Add(handle);
             yield return handle;
             var gameobject = handle.Result;
             gameobject.transform.SetParent(this.transform);
+            gameobject.name = name;
             var unitController = gameobject.GetComponent<UnitController>();
             unitController.TPSController.IsTPSControllActive = false;
             if (unitType == UnitType.Player)

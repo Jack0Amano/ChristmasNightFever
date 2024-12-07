@@ -6,6 +6,7 @@ using Cinemachine;
 using static Utility;
 using System.Linq;
 using System.Collections.Generic;
+using AmplifyShaderEditor;
 
 namespace Units.TPS
 {
@@ -142,6 +143,10 @@ namespace Units.TPS
         }
         private UnitController unitController;
 
+        /// <summary>
+        /// AutoMoveの経路探索をキャッシュしたもの
+        /// </summary>
+        readonly private AutoMoveCornersCash autoMoveCornersCash = new AutoMoveCornersCash();
 
         /// <summary>
         /// UnitがAlongWallに接触しておりカバー状態である
@@ -159,6 +164,8 @@ namespace Units.TPS
         /// Unitが沿っているObjectの接触地点
         /// </summary>
         public Vector3 FollowingWallTouchPosition { get => m_Character.FollowingWallTouchPosition; }
+
+
 
         private void Awake()
         {
@@ -340,18 +347,48 @@ namespace Units.TPS
         /// <summary>
         /// Unitを自動で目的地まで走らせる
         /// </summary>
-        /// <param name="to"></param>
-        /// <param name="navMeshAgent"></param>
+        /// <param name="to">目的地</param>
+        /// <param name="navMeshAgent">UnitのNavmeshagent</param>
+        /// <param name="run">目的地に向け走るかどうか</param>
+        /// <param name="debug">デバッグ用にGizmoに経路を表示するか</param>
+        /// <param name="timeOutMove">到着するののこれ以上かかった場合目的地に瞬間移動する 0なら瞬間移動を行わない</param>
+        /// <param name="useChash">経路を以前行った経路探索からのキャッシュで行うか 新規に経路探索する場合false</param>
+        /// <param name="timeOutPathFind">経路探索がタイムアウトする時間</param>
         /// <returns></returns>
-        internal IEnumerator AutoMove(Vector3 to, NavMeshAgent navMeshAgent, bool debug = false)
+        internal IEnumerator AutoMove(Vector3 to, NavMeshAgent navMeshAgent, bool run, float timeOutMove=30, bool useChash=true, bool debug = false, float timeOutPathFind = 5)
         {
-            navMeshAgent.SetDestination(to);
-            while (!navMeshAgent.hasPath)
-                yield return null;
+            IsAutoMoving = true;
 
-            var corners = navMeshAgent.path.corners.ToList();
-            debugAutoMovingWay = corners;
-            navMeshAgent.ResetPath();
+            List<Vector3> corners = null;
+
+            if (useChash)
+            {
+                var cash = autoMoveCornersCash.GetCash(transform.position, to);
+                if (cash != null)
+                    corners = cash.ToList();
+            }
+            if (corners == null)
+            {
+                navMeshAgent.SetDestination(to);
+                var startTime = Time.time;
+                while (!navMeshAgent.hasPath)
+                {
+                    if (Time.time - startTime > timeOutPathFind)
+                    {
+                        PrintWarning("Time is over to find path to", to);
+                        IsAutoMoving = false;
+                        yield break;
+                    }
+                    yield return null;
+                }
+
+                corners = navMeshAgent.path.corners.ToList();
+                debugAutoMovingWay = corners;
+                navMeshAgent.ResetPath();
+
+                autoMoveCornersCash.AddCash(transform.position, to, corners);
+            }
+
 
             IsAutoMoving = true;
             IsMoving = true;
@@ -365,7 +402,9 @@ namespace Units.TPS
                 }
             }
 
-            const float TimeOver = 10000f;
+            // まず回転してから移動を開始するためのsmoothDeltaPositionの参考値
+            Vector2 turnSmoothDeltaTemplate = new Vector2(0, -1);
+
             for (var i = 1; i < corners.Count; i++)
             {
                 var startTime = DateTime.Now;
@@ -387,7 +426,23 @@ namespace Units.TPS
                     bool shouldMove = velocity.magnitude > 0.5f && Vector3.Distance(transform.position, corner) > navMeshAgent.radius / 5;
                     if (!shouldMove) break;
 
-                    m_Character.WorldMove(smoothDeltaPosition, 2);
+                    // smoothDeltaPositionのWorldMove内で正規化される値
+                    var testSmoothDeltaPosition = smoothDeltaPosition;
+                    testSmoothDeltaPosition.Normalize();
+                    var _speed = 0.5 * 10f;
+                    var x = (float)Math.Ceiling(testSmoothDeltaPosition.x * _speed) / 10f;
+                    var y = (float)Math.Ceiling(testSmoothDeltaPosition.y * _speed) / 10f;
+                    // 後ろへ歩くモーションは設定していないため真後ろへの移動は一回回転してから行う
+                    if (testSmoothDeltaPosition.NearlyEqual(turnSmoothDeltaTemplate, 0.1f))
+                    {
+                        yield return StartCoroutine(RotateTo(corner, run));
+                        // RotateToの内部でIsAutoMovingがfalseになりWhileを抜けてしまうので修正
+                        IsAutoMoving = true;
+                        isMoving = true;
+                        continue;
+                    }
+
+                    m_Character.WorldMove(smoothDeltaPosition, run ? 1: 0.5f);
                     yield return null;
 
                     // 一時停止に対応
@@ -399,7 +454,8 @@ namespace Units.TPS
                         startTime.Add(DateTime.Now - startPause);
                     }
 
-                    if ((DateTime.Now - startTime).TotalMilliseconds > TimeOver)
+                    //// 時間がかかりすぎた場合瞬間移動
+                    if (　timeOutMove != 0 &&　(DateTime.Now - startTime).TotalMilliseconds > timeOutMove * 1000)
                     {
                         PrintWarning("Time is over to move to corner of", corner);
                         transform.position = new Vector3(corner.x, 2, corner.z);
@@ -460,6 +516,7 @@ namespace Units.TPS
         /// </summary>
         public void CancelAutoMoving()
         {
+            isMoving = false;
             IsAutoMoving = false;
         }
 
@@ -519,6 +576,59 @@ namespace Units.TPS
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// AutoMoveを行う際の経路探索をキャッシュする
+    /// </summary>
+    class AutoMoveCornersCash
+    {
+        readonly List<(Vector3 from, Vector3 to, IEnumerable<Vector3> corners)> cornersCash = new List<(Vector3 from, Vector3 to, IEnumerable<Vector3> corners)>();
+
+        // キャッシュ取得時の誤差の許容値
+        private const float POSITION_ERROR = 0.1f;
+
+        // 保存するキャッシュの最大数
+        private const int MAX_CASH = 20;
+
+        /// <summary>
+        /// 新規に経路探索した経路をキャッシュする
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        public void AddCash(Vector3 from, Vector3 to, IEnumerable<Vector3> corners)
+        {
+            if (cornersCash.Count >= MAX_CASH)
+                cornersCash.RemoveAt(0);
+
+            cornersCash.Add((from, to, corners));
+        }
+
+        /// <summary>
+        /// キャッシュから経路を取得する
+        /// </summary>
+        public IEnumerable<Vector3> GetCash(Vector3 from, Vector3 to)
+        {
+            // キャッシュが存在する場合
+            if ( cornersCash.TryFindFirst(c => c.from.NearlyEqual(from, POSITION_ERROR) && c.to.NearlyEqual(to, POSITION_ERROR), out var result))
+            {
+                // キャッシュの自動削除に対応するため検索された新しいものを最後に持ってくる
+                cornersCash.Remove(result);
+                cornersCash.Add(result);
+                return result.corners;
+            }
+
+            // toとfromが逆の場合も検索
+            if (cornersCash.TryFindFirst(c => c.from.NearlyEqual(to, POSITION_ERROR) && c.to.NearlyEqual(from, POSITION_ERROR), out result))
+            {
+                // キャッシュの自動削除に対応するため検索された新しいものを最後に持ってくる
+                cornersCash.Remove(result);
+                cornersCash.Add(result);
+                return result.corners.Reverse();
+            }
+
+            return null;
+        }
     }
 }
 

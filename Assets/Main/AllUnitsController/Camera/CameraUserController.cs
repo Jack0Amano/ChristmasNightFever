@@ -939,7 +939,6 @@ namespace Units
         private IEnumerator ActivateVirtualCamera(CinemachineVirtualCamera cam, ThirdPersonUserControl thirdPersonUserControl)
         {
             yield return null;
-            print($"ActivateVirtualCamera({cam}), TPSController({thirdPersonUserControl}), ActiveTPS({ActiveTPSController})");
             IsOverrideCameraActive = false;
 
             // カメラの遷移でカメラ間の距離が離れている場合はCutBlendを使用する

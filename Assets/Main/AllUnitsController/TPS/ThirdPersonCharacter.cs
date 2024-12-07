@@ -170,6 +170,7 @@ namespace Units.TPS
         /// </summary>
         private float MaxSpeedWhenFollowWall;
 
+
         #endregion
 
         void Awake()
@@ -393,6 +394,7 @@ namespace Units.TPS
 
             m_TurnAmount = x;
             m_ForwardAmount = y;
+
 
             ApplyExtraTurnRotation();
 

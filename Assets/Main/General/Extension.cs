@@ -600,6 +600,14 @@ public static class Vector2Extensions
     {
         return v.Sum() / 2;
     }
+
+    /// <summary>
+    /// aとbが誤差の範囲内で同じかどうか
+    /// </summary>
+    public static bool NearlyEqual(this Vector2 a, Vector2 b, float error = 0.01f)
+    {
+        return Mathf.Abs(a.x - b.x) < error && Mathf.Abs(a.y - b.y) < error;
+    }
 }
 
 
@@ -700,6 +708,15 @@ public static class Vector3Extensions
     {
         return new Color(v.x, v.y, v.z);
     }
+
+    /// <summary>
+    /// aとbが誤差の範囲内で同じかどうか
+    /// </summary>
+    public static bool NearlyEqual(this Vector3 a, Vector3 b, float error = 0.01f)
+    {
+        return Mathf.Abs(a.x - b.x) < error && Mathf.Abs(a.y - b.y) < error && Mathf.Abs(a.z - b.z) < error;
+    }
+
 }
 
 public static class Vector4Extensions

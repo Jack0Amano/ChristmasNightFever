@@ -116,6 +116,8 @@ namespace StageObjects
         [SerializeField] public int index;
         [Tooltip("一時停止を行う時間 マイナスならずっと停止")]
         [SerializeField] public float stopTime;
+        [Tooltip("移動先にこの地点を指定されたときに走るか")]
+        [SerializeField] public bool runToThisPoint = false;
         [Tooltip("通過もしくは一時停止地点のTransform ランタイムで自動補完される")]
         [NonSerialized] public Transform pointTransform;
 

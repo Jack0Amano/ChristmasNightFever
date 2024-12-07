@@ -162,7 +162,10 @@ namespace Units.AI
             var nextWay = way[currentWayIndex];
             // ここでFindOutLevelを監視しながら移動が完了するまで待つ
 
-            StartCoroutine(MoveTo(nextWay.pointTransform.position));
+            if (gameObject.name.Contains("Way1 (0)"))
+                Print("MoveToNextWay_MainRoutine", nextWay.stopTime);
+
+            StartCoroutine(MoveTo(nextWay.pointTransform.position, nextWay.runToThisPoint));
             var startFindOutLevel = FindOutLevel;
             yield return new WaitForSeconds(0.5f);
             while(tpsController.IsAutoMoving)
@@ -197,6 +200,12 @@ namespace Units.AI
                 yield return new WaitForSeconds(delay);
             }
 
+            if (gameObject.name.Contains("Way1 (0)"))
+            {
+
+                Print("StopAndFindAtCurrentPlace_MainRoutine search", currentWay.stopTime);
+            }
+
             if (currentWay.stopTime > 0)
             {
                 // 一度見回すアニメーションを再生する
@@ -224,6 +233,10 @@ namespace Units.AI
                     // おおよそ10秒ごとだがランダムにSearchingを再生する
                     if (Time.time - lastSearchiAnimationTime > nextSearchInterval)
                     {
+                        if (gameObject.name.Contains("01"))
+                        {
+                            Print("StopAndFindAtCurrentPlace_MainRoutine search");
+                        }
                         StartCoroutine(tpsController.Searching());
                         lastSearchiAnimationTime = Time.time;
                         nextSearchInterval = UnityEngine.Random.Range(5, 15);
@@ -258,7 +271,7 @@ namespace Units.AI
                 yield return new WaitForSeconds(delay);
             }
 
-            StartCoroutine(MoveTo(position));
+            StartCoroutine(MoveTo(position, true));
             var startFindOutLevel = FindOutLevel;
             yield return new WaitForSeconds(0.5f);
             while (tpsController.IsAutoMoving)
@@ -329,7 +342,7 @@ namespace Units.AI
 
             var currentWay = way[currentWayIndex];
             print(currentWay.pointTransform.position);
-            StartCoroutine(MoveTo(currentWay.pointTransform.position));
+            StartCoroutine(MoveTo(currentWay.pointTransform.position, false));
             var startFindOutLevel = FindOutLevel;
             yield return new WaitForSeconds(0.5f);
             while (tpsController.IsAutoMoving)
@@ -377,7 +390,7 @@ namespace Units.AI
             if (FindOutLevel == 1)
             {
                 // プレイヤーを見つけたためすべてのループを終了して一目散に駆け寄る
-                StartCoroutine(MoveTo(playerUnitController.targetCollider.transform.position));
+                StartCoroutine(MoveTo(playerUnitController.targetCollider.transform.position, true));
                 return false;
             }
             else if (moveState == EnemyAIMoveState.Finish)
@@ -521,7 +534,7 @@ namespace Units.AI
         /// NavMeshを使用してLocationに移動
         /// </summary>
         /// <param name="location"></param>
-        public IEnumerator MoveTo(Vector3 location)
+        public IEnumerator MoveTo(Vector3 location, bool run)
         {
             // NavMeshObstacleは他のUnitとの衝突を避けるために使う今回はなしでいい
             //navMeshObstacle.enabled = false;
@@ -530,8 +543,7 @@ namespace Units.AI
             // navMeshAgent.SetDestination(location);
 
             location.y = this.transform.position.y;
-            yield return StartCoroutine(tpsController.AutoMove(location, navMeshAgent, debugDrawAimWalkingLine));
-            tpsController.CancelAutoMoving();
+            yield return StartCoroutine(tpsController.AutoMove(location, navMeshAgent, run, debug: debugDrawAimWalkingLine));
             //navMeshAgent.isStopped = true;
 
             //navMeshAgent.enabled = false;
