@@ -357,6 +357,7 @@ namespace Units.TPS
         internal IEnumerator AutoMove(Vector3 to, NavMeshAgent navMeshAgent, bool run, float timeOutMove=30, bool useChash=true, bool debug = false, float timeOutPathFind = 5)
         {
             IsAutoMoving = true;
+            IsMoving = true;
 
             List<Vector3> corners = null;
 
@@ -502,6 +503,8 @@ namespace Units.TPS
 
                 if (Math.Abs(smoothDeltaPosition.x) < 0.05)
                     break;
+
+                print(smoothDeltaPosition);
 
                 yield return null;
                 m_Character.Rotate(smoothDeltaPosition.x);

@@ -63,9 +63,6 @@ namespace Units
                 var spawnCorutines = stageObjectsController.EnemyWays.ConvertAll(way =>
                 {
                     var enemyID = enemyUnitIDList[Random.Range(0, enemyUnitIDList.Count)];
-                    print(way.pointAndStops[0].pointTransform);
-                    print(way.pointsParent.name);
-                    print(way.pointAndStops);
                     return StartCoroutine(SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointsParent.name, way.pointAndStops));
                 });
                 spawnCorutines.Add(StartCoroutine(SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player, "Player")));

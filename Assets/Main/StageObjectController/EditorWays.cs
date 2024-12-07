@@ -42,7 +42,6 @@ namespace StageObjects
                     }
                     count++;
                 }
-                print(w.pointAndStops[0].pointTransform);
                 w.pointAndStops.Sort((a, b) => a.index - b.index);
                 // Inspectorでpointsよりも多い数のpointAndStopがある場合は削除 Inspectorで誤入力している
                 w.pointAndStops.Slice(0, count);

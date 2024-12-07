@@ -167,8 +167,8 @@ namespace Units.AI
 
             StartCoroutine(MoveTo(nextWay.pointTransform.position, nextWay.runToThisPoint));
             var startFindOutLevel = FindOutLevel;
-            yield return new WaitForSeconds(0.5f);
-            while(tpsController.IsAutoMoving)
+            yield return new WaitForSeconds(1f);
+            while(tpsController.IsAutoMoving && tpsController.IsMoving)
             {
                 // SituationCheckerで状況が変わっていないかを確認
                 // resultがfalseならば移動をキャンセル、SituationCheckerが新しい状況に移動するためのアニメーションを開始する
