@@ -6,7 +6,6 @@ using Cinemachine;
 using static Utility;
 using System.Linq;
 using System.Collections.Generic;
-using AmplifyShaderEditor;
 
 namespace Units.TPS
 {

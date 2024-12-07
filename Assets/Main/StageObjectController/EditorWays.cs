@@ -28,7 +28,6 @@ namespace StageObjects
                     continue;
                 if (!w.enable)
                     continue;
-
                 var count = 0;
                 foreach (Transform pass in w.pointsParent.transform)
                 {
@@ -43,6 +42,7 @@ namespace StageObjects
                     }
                     count++;
                 }
+                print(w.pointAndStops[0].pointTransform);
                 w.pointAndStops.Sort((a, b) => a.index - b.index);
                 // Inspectorでpointsよりも多い数のpointAndStopがある場合は削除 Inspectorで誤入力している
                 w.pointAndStops.Slice(0, count);
@@ -119,7 +119,7 @@ namespace StageObjects
         [Tooltip("移動先にこの地点を指定されたときに走るか")]
         [SerializeField] public bool runToThisPoint = false;
         [Tooltip("通過もしくは一時停止地点のTransform ランタイムで自動補完される")]
-        [NonSerialized] public Transform pointTransform;
+        public Transform pointTransform;
 
         internal PointAndStopTime(int waysIndex, float stopTime, Transform pointTransform)
         {

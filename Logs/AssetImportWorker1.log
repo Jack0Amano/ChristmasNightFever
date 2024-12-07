@@ -3464,3 +3464,17 @@ AssetImportParameters requested are different than current active one (requested
   custom:CustomObjectIndexerAttribute: 39606d92bcf39ac9cd6fca1116091104 -> 
   custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
   custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+========================================================================
+Received Import Request.
+  Time since last request: 41035.545188 seconds.
+  path: Assets/Plugins/Azure[Sky] Dynamic Skybox/Core/Meshes/LightConeMesh1.obj
+  artifactKey: Guid(e93cab80d3ecdf84585ee42948ef076a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Plugins/Azure[Sky] Dynamic Skybox/Core/Meshes/LightConeMesh1.obj using Guid(e93cab80d3ecdf84585ee42948ef076a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '0a9e566aa3891dfb613190385719298c') in 1.057691 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 29
+Editor requested this worker to shutdown with reason: Scaling down because of idle timeout
+TcpMessagingSession - receive error
+AssetImportWorkerClient::OnTransportError - code=2 error=End of file
+AssetImportWorker is now disconnected from the server
+Process exiting
+Exiting without the bug reporter. Application will terminate with return code 0
