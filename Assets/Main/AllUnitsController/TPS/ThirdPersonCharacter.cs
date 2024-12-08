@@ -47,53 +47,53 @@ namespace Units.TPS
         /// <summary>
         /// UnitがWallに張り付いておりここで移動を開始した時間
         /// </summary>
-        private DateTime StartToMoveTimeOnFollowingWall;
+        private DateTime startToMoveTimeOnFollowingWall;
         /// <summary>
         /// Wallに張り付き移動をした最後のOnMoveAnimatorCount
         /// </summary>
-        private uint LastMoveFollowingWallCount = 0;
+        private uint lastMoveFollowingWallCount = 0;
         /// <summary>
         /// 壁に沿って移動する際の移動開始カーブのカーブ経過時間 MoveAlongWallAnimationCurve.length.time
         /// </summary>
-        private double MoveAlongWallAnimationTotalDuration;
+        private double moveAlongWallAnimationTotalDuration;
         /// <summary>
         /// Animatorの移動の継続カウント 移動=0になったときにOnMoveAnimatorCount=0になる
         /// </summary>
-        private uint OnMoveAnimatorCount = 0;
+        private uint onMoveAnimatorCount = 0;
         /// <summary>
         /// Wallから離れるLeaveMoveの最後のOnMoveAnimatorCount
         /// </summary>
-        private uint LastLeaveFromWallCount = 0;
+        private uint lastLeaveFromWallCount = 0;
         /// <summary>
         /// Leave動作を開始した時間
         /// </summary>
-        private DateTime StartToLeaveFromWallTime;
+        private DateTime startToLeaveFromWallTime;
 
-        Sequence AlongWallRotationAnimation;
+        Sequence alongWallRotationAnimation;
 
         public bool IsDashMode { private set; get; }
 
-        Rigidbody m_Rigidbody;
-        Animator m_Animator;
+        new Rigidbody rigidbody;
+        Animator animator;
         // bool m_IsGrounded;
-        float m_OrigGroundCheckDistance;
-        const float k_Half = 0.5f;
-        float m_TurnAmount;
-        float m_ForwardAmount;
-        Vector3 m_GroundNormal;
-        float m_CapsuleHeight;
-        Vector3 m_CapsuleCenter;
-        CapsuleCollider m_Capsule;
-        public bool m_Crouching { private set; get; }
-        bool m_Aiming = false;
+        float origGroundCheckDistance;
+        const float K_HALF = 0.5f;
+        float turnAmount;
+        float forwardAmount;
+        Vector3 groundNormal;
+        float capsuleHeight;
+        Vector3 capsuleCenter;
+        CapsuleCollider capsule;
+        public bool Crouching { private set; get; }
+        bool aiming = false;
 
         /// <summary>
         /// Animatorのレイヤー
         /// </summary>
-        const int BaseLayer = 0;
-        const int UpperLayer = 1;
-        const int UpperLayerWithMask = 2;
-        const int OverlayLayer = 3;
+        const int BASE_LAYER = 0;
+        const int UPPER_LAYER = 1;
+        const int UPPER_LAYER_WITH_MASK = 2;
+        const int OVERLAY_LAYER = 3;
 
         /// <summary>
         /// UnitがAlongWallに接触しておりカバー状態である
@@ -103,7 +103,7 @@ namespace Units.TPS
         /// Unitが沿っているWallのgameobject
         /// </summary>
         public GameObject FollowWallObject { private set; get; }
-        private Vector3 FollowWallNormal;
+        private Vector3 followWallNormal;
 
         /// <summary>
         /// Unitが沿っているObjectがGimmickObjectである場合そのGimmickObject
@@ -119,15 +119,15 @@ namespace Units.TPS
         /// </summary>
         public bool PauseAnimation
         {
-            get => _pauseAnimation;
+            get => pauseAnimation;
             set
             {
-                _pauseAnimation = value;
-                if (m_Animator != null && m_Animator.enabled)
-                    m_Animator.speed = value ? 0 : 1;
+                pauseAnimation = value;
+                if (animator != null && animator.enabled)
+                    animator.speed = value ? 0 : 1;
             }
         }
-        private bool _pauseAnimation = false;
+        private bool pauseAnimation = false;
 
         /**
          * 最低限必要なAnimatorパラメータ
@@ -137,18 +137,18 @@ namespace Units.TPS
         #region CoverAction properties
         
         
-        private int CollisionObjectLayer;
-        int UnitHitsWallFrameCount;
+        private int collisionObjectLayer;
+        int unitHitsWallFrameCount;
         /// <summary>
         /// Unitが壁に接触している状態
         /// </summary>
         public bool UnitHitsWall { private set; get; } = false;
-        bool IsCovering = false;
-        Vector3 TakeCoverNormal;
+        bool isCovering = false;
+        Vector3 takeCoverNormal;
         /// <summary>
         /// 接触している壁に対するDot積
         /// </summary>
-        float WallDotProduct;
+        float wallDotProduct;
         /// <summary>
         /// 接触している壁
         /// </summary>
@@ -156,35 +156,39 @@ namespace Units.TPS
         /// <summary>
         /// Unitの移動
         /// </summary>
-        Vector3 AddVelocity;
+        Vector3 addVelocity;
         /// <summary>
         /// Unitが貼り付ける壁の最小角度
         /// </summary>
-        const float TakeCoverMinAngle = 80;
+        const float TAKE_COVER_MIN_ANGLE = 80;
         /// <summary>
         /// Unitが貼り付ける壁の最大角度
         /// </summary>
-        const float TakeCoverMaxAngle = 110;
+        const float TAKE_COVER_MAX_ANGLE = 110;
         /// <summary>
         /// Wallに沿って歩いているときの最大速度 MoveFollowingWallAnimationCurveのvalueの最終値となる
         /// </summary>
-        private float MaxSpeedWhenFollowWall;
+        private float maxSpeedWhenFollowWall;
+        /// <summary>
+        /// Animatorのアニメーションからの加速度とRigidbodyの速度を合わせるためにFixedUpdateで使う Animatorの1フレーム前の速度
+        /// </summary>
+        Vector3 previousAnimatorVelocity = Vector3.zero;
 
 
         #endregion
 
         void Awake()
         {
-            m_Animator = GetComponent<Animator>();
-            m_Rigidbody = GetComponent<Rigidbody>();
-            m_Capsule = GetComponent<CapsuleCollider>();
-            m_CapsuleHeight = m_Capsule.height;
-            m_CapsuleCenter = m_Capsule.center;
+            animator = GetComponent<Animator>();
+            rigidbody = GetComponent<Rigidbody>();
+            capsule = GetComponent<CapsuleCollider>();
+            capsuleHeight = capsule.height;
+            capsuleCenter = capsule.center;
 
-            m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
-            m_OrigGroundCheckDistance = m_GroundCheckDistance;
+            rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+            origGroundCheckDistance = m_GroundCheckDistance;
 
-            CollisionObjectLayer = 1 << LayerMask.NameToLayer("Object");
+            collisionObjectLayer = 1 << LayerMask.NameToLayer("Object");
 
             //BodyTrigger.EnterAlongWallActionHandler = EnterAlongWallCallback;
             //BodyTrigger.StayAlongWallActionHandler = StayAlonwWallCallback;
@@ -365,9 +369,9 @@ namespace Units.TPS
             // direction.
             if (move.magnitude > 1f) move.Normalize();
             move = transform.InverseTransformDirection(move);
-            move = Vector3.ProjectOnPlane(move, m_GroundNormal);
-            m_TurnAmount = Mathf.Atan2(move.x, move.z);
-            m_ForwardAmount = move.z;
+            move = Vector3.ProjectOnPlane(move, groundNormal);
+            turnAmount = Mathf.Atan2(move.x, move.z);
+            forwardAmount = move.z;
 
             ApplyExtraTurnRotation();
 
@@ -375,7 +379,7 @@ namespace Units.TPS
             // PreventStandingInLowHeadroom();
 
             // send input and other state parameters to the animator
-            UpdateAnimator(move);
+            UpdateMoveAnimator(move);
         }
 
         /// <summary>
@@ -385,20 +389,20 @@ namespace Units.TPS
         /// <param name="speed">0.5(歩行)~1(走る)</param>
         public void WorldMove(Vector2 move, float speed)
         {
-            m_Animator.SetLayerWeight(UpperLayer, 0);
+            animator.SetLayerWeight(UPPER_LAYER, 0);
 
             move.Normalize();
             var _speed = speed * 10f;
             var x = (float)Math.Ceiling(move.x * _speed) / 10f;
             var y = (float)Math.Ceiling(move.y * _speed) / 10f;
 
-            m_TurnAmount = x;
-            m_ForwardAmount = y;
+            turnAmount = x;
+            forwardAmount = y;
 
 
             ApplyExtraTurnRotation();
 
-            UpdateAnimator(new Vector2(x, y));
+            UpdateMoveAnimator(new Vector2(x, y));
         }
 
         /// <summary>
@@ -408,7 +412,7 @@ namespace Units.TPS
         public void Rotate(float value)
         {
             RotateWithoutAnimation(value);
-            UpdateAnimator(Vector3.zero);
+            UpdateMoveAnimator(Vector3.zero);
         }
 
         /// <summary>
@@ -417,55 +421,58 @@ namespace Units.TPS
         /// <param name="value"></param>
         public void RotateWithoutAnimation(float value)
         {
-            m_TurnAmount = value;
-            m_ForwardAmount = 0;
+            turnAmount = value;
+            forwardAmount = 0;
             ApplyExtraTurnRotation();
 
-            m_Animator.SetFloat("Forward", 0, 0, Time.deltaTime);
-            m_Animator.SetFloat("Turn", 0, 0, Time.deltaTime);
-            if(!m_Rigidbody.isKinematic)
-                m_Rigidbody.velocity = Vector3.zero;
+            animator.SetFloat("Forward", 0, 0, Time.deltaTime);
+            animator.SetFloat("Turn", 0, 0, Time.deltaTime);
+            if(!rigidbody.isKinematic)
+                rigidbody.velocity = Vector3.zero;
         }
 
         void PreventStandingInLowHeadroom()
         {
             // prevent standing up in crouch-only zones
-            if (!m_Crouching)
+            if (!Crouching)
             {
-                Ray crouchRay = new Ray(m_Rigidbody.position + Vector3.up * m_Capsule.radius * k_Half, Vector3.up);
-                float crouchRayLength = m_CapsuleHeight - m_Capsule.radius * k_Half;
-                if (Physics.SphereCast(crouchRay, m_Capsule.radius * k_Half, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore))
+                Ray crouchRay = new Ray(rigidbody.position + Vector3.up * capsule.radius * K_HALF, Vector3.up);
+                float crouchRayLength = capsuleHeight - capsule.radius * K_HALF;
+                if (Physics.SphereCast(crouchRay, capsule.radius * K_HALF, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore))
                 {
-                    m_Crouching = true;
+                    Crouching = true;
                 }
             }
         }
 
-
-        void UpdateAnimator(Vector3 move)
+        /// <summary>
+        /// 移動の際にAnimatorにパラメーターを渡す
+        /// </summary>
+        /// <param name="move"></param>
+        void UpdateMoveAnimator(Vector3 move)
         {
             // update the animator parameters
             if (!IsFollowingWallMode)
             {
-                m_Animator.SetFloat("Forward", m_ForwardAmount, 0.1f, Time.deltaTime);
-                m_Animator.SetFloat("Turn", m_TurnAmount, 0.1f, Time.deltaTime);
+                animator.SetFloat("Forward", forwardAmount, 0.1f, Time.deltaTime);
+                animator.SetFloat("Turn", turnAmount, 0.1f, Time.deltaTime);
             }
             else
             {
-                m_Animator.SetFloat("Turn", m_TurnAmount, 0.1f, Time.deltaTime);
-                m_Animator.SetFloat("Forward", -0.0001f, 0.1f, Time.deltaTime);
+                animator.SetFloat("Turn", turnAmount, 0.1f, Time.deltaTime);
+                animator.SetFloat("Forward", -0.0001f, 0.1f, Time.deltaTime);
             }
 
             // the anim speed multiplier allows the overall speed of walking/running to be tweaked in the inspector,
             // which affects the movement speed because of the root motion.
             if (move.magnitude > 0)
             {
-                m_Animator.speed = m_AnimSpeedMultiplier;
+                animator.speed = m_AnimSpeedMultiplier;
             }
             else
             {
                 // don't use that while airborne
-                m_Animator.speed = 1;
+                animator.speed = 1;
             }
         }
 
@@ -474,20 +481,20 @@ namespace Units.TPS
         {
             // apply extra gravity from multiplier:
             Vector3 extraGravityForce = (Physics.gravity * m_GravityMultiplier) - Physics.gravity;
-            m_Rigidbody.AddForce(extraGravityForce);
+            rigidbody.AddForce(extraGravityForce);
 
-            m_GroundCheckDistance = m_Rigidbody.velocity.y < 0 ? m_OrigGroundCheckDistance : 0.01f;
+            m_GroundCheckDistance = rigidbody.velocity.y < 0 ? origGroundCheckDistance : 0.01f;
         }
 
 
         void HandleGroundedMovement(bool crouch, bool jump)
         {
             // check whether conditions are right to allow a jump:
-            if (jump && !crouch && m_Animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded"))
+            if (jump && !crouch && animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded"))
             {
                 // jump!
-                m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z);
-                m_Animator.applyRootMotion = false;
+                rigidbody.velocity = new Vector3(rigidbody.velocity.x, m_JumpPower, rigidbody.velocity.z);
+                animator.applyRootMotion = false;
                 m_GroundCheckDistance = 0.1f;
             }
         }
@@ -497,75 +504,75 @@ namespace Units.TPS
             if (!IsFollowingWallMode)
             {
                 // help the character turn faster (this is in addition to root rotation in the animation)
-                float turnSpeed = Mathf.Lerp(m_StationaryTurnSpeed, m_MovingTurnSpeed, m_ForwardAmount);
-                transform.Rotate(0, m_TurnAmount * turnSpeed * Time.deltaTime, 0);
+                float turnSpeed = Mathf.Lerp(m_StationaryTurnSpeed, m_MovingTurnSpeed, forwardAmount);
+                transform.Rotate(0, turnAmount * turnSpeed * Time.deltaTime, 0);
             }
         }
 
-        private uint LastFrameMoveOnFollowingWall = 0;
+        private uint lastFrameMoveOnFollowingWall = 0;
         public void OnAnimatorMove()
         {
             // KinematicなRigidbodyの場合はVelocityを設定できないためアニメーションからの移動を行わない
-            if (m_Rigidbody.isKinematic) return;
+            if (rigidbody.isKinematic) return;
 
             if (!IsFollowingWallMode)
             {
                 // FollowWallModeでなく通常の移動
                 // we implement this function to override the default root motion.
                 // this allows us to modify the positional speed before it's applied.
-                if (Time.deltaTime > 0 && m_Animator.deltaPosition != Vector3.zero)
+                if (Time.deltaTime > 0 && animator.deltaPosition != Vector3.zero)
                 {
-                    AddVelocity = (m_Animator.deltaPosition * m_MoveSpeedMultiplier) / Time.deltaTime;
-                    AddVelocity.y = m_Rigidbody.velocity.y;
-                    if (m_Rigidbody.isKinematic)
+                    addVelocity = (animator.deltaPosition * m_MoveSpeedMultiplier) / Time.deltaTime;
+                    addVelocity.y = rigidbody.velocity.y;
+                    if (rigidbody.isKinematic)
                         print(this);
-                    m_Rigidbody.velocity = AddVelocity;
+                    rigidbody.velocity = addVelocity;
                 }
             }
             else
             {
                 // すでに修正済みだが壁から離れる動作が遅れる == 離れるアニメーションが即座に実行されない原因はAnimatorの遷移のHasExitTimeがtrueになっている
 
-                AddVelocity = new Vector3(m_TurnAmount, 0, m_ForwardAmount);
-                if (AddVelocity.magnitude > 0.1)
+                addVelocity = new Vector3(turnAmount, 0, forwardAmount);
+                if (addVelocity.magnitude > 0.1)
                 {
                     // Convert local velocity to velocity on world position
-                    AddVelocity = (transform.TransformPoint(AddVelocity) - transform.position).normalized;
-                    var angle = Vector3.Angle(AddVelocity, FollowWallNormal);
+                    addVelocity = (transform.TransformPoint(addVelocity) - transform.position).normalized;
+                    var angle = Vector3.Angle(addVelocity, followWallNormal);
                     if (FollowingWallMaxDegree < angle)
                     {
                         // 壁に向かってほぼ垂直に移動しようとしている
-                        StartToLeaveFromWallTime = DateTime.Now;
+                        startToLeaveFromWallTime = DateTime.Now;
                     }
                     else if (FollowingWallMinDegree > angle)
                     {
                         // 壁から離れようとする移動方向
                         //m_Rigidbody.velocity = AddVelocity;
                         //AlongWallObject = null;
-                        if (OnMoveAnimatorCount - LastLeaveFromWallCount > 30)
+                        if (onMoveAnimatorCount - lastLeaveFromWallCount > 30)
                         {
-                            StartToLeaveFromWallTime = DateTime.Now;
+                            startToLeaveFromWallTime = DateTime.Now;
                         }
-                        else if ((float)((DateTime.Now - StartToLeaveFromWallTime).TotalSeconds) > LeaveFromWallSeconds)
+                        else if ((float)((DateTime.Now - startToLeaveFromWallTime).TotalSeconds) > LeaveFromWallSeconds)
                         {
                             // 離れる動作をLeaveFromWallSecond間行ったためLeave動作を開始する
                             // EndToFollowWall(FollowWallObject);
 
                         }
-                        LastLeaveFromWallCount = OnMoveAnimatorCount + 1;
+                        lastLeaveFromWallCount = onMoveAnimatorCount + 1;
                     }
                     else
                     {
-                        StartToLeaveFromWallTime = DateTime.Now;
+                        startToLeaveFromWallTime = DateTime.Now;
 
-                        var moveAmount = Math.Abs(m_TurnAmount);
-                        float secondsFromStartToMoveTimeOnFollowingWall = (float)(DateTime.Now - StartToMoveTimeOnFollowingWall).TotalSeconds;
-                        if (OnMoveAnimatorCount - LastMoveFollowingWallCount > 60)
+                        var moveAmount = Math.Abs(turnAmount);
+                        float secondsFromStartToMoveTimeOnFollowingWall = (float)(DateTime.Now - startToMoveTimeOnFollowingWall).TotalSeconds;
+                        if (onMoveAnimatorCount - lastMoveFollowingWallCount > 60)
                         {
                             // 最後の入力から十分時間が経っている状況
-                            StartToMoveTimeOnFollowingWall = DateTime.Now;
+                            startToMoveTimeOnFollowingWall = DateTime.Now;
                         }
-                        if (secondsFromStartToMoveTimeOnFollowingWall < MoveAlongWallAnimationTotalDuration)
+                        if (secondsFromStartToMoveTimeOnFollowingWall < moveAlongWallAnimationTotalDuration)
                         {
                             // 移動を開始したCurve内
                             moveAmount = MoveFollowingWallAnimationCurve.Evaluate(secondsFromStartToMoveTimeOnFollowingWall);
@@ -573,16 +580,16 @@ namespace Units.TPS
 
 
                         // 壁に沿って移動する速度の最大値に達している
-                        if (OnMoveAnimatorCount - LastFrameMoveOnFollowingWall < 3)
+                        if (onMoveAnimatorCount - lastFrameMoveOnFollowingWall < 3)
                         {
                             //IsMovingOnFollowingWall = true;
                         }
                                 
                         else
-                            LastFrameMoveOnFollowingWall = OnMoveAnimatorCount;
-                        m_Rigidbody.velocity = Quaternion.AngleAxis(m_TurnAmount < 0 ? -90 : 90, Vector3.up) * FollowWallNormal * moveAmount;
+                            lastFrameMoveOnFollowingWall = onMoveAnimatorCount;
+                        rigidbody.velocity = Quaternion.AngleAxis(turnAmount < 0 ? -90 : 90, Vector3.up) * followWallNormal * moveAmount;
 
-                        LastMoveFollowingWallCount = OnMoveAnimatorCount + 1;
+                        lastMoveFollowingWallCount = onMoveAnimatorCount + 1;
 
                         // 壁に沿って左右に移動する
                         
@@ -590,15 +597,17 @@ namespace Units.TPS
                 }
             }
 
-            OnMoveAnimatorCount++;
+            onMoveAnimatorCount++;
         }
 
         private void FixedUpdate()
         {
-            if (IsFollowingWallMode && !m_Rigidbody.isKinematic)
+            
+
+            if (IsFollowingWallMode && !rigidbody.isKinematic)
             {
-                if (m_ForwardAmount == 0 || m_TurnAmount == 0)
-                    m_Rigidbody.velocity = Vector3.zero;
+                if (forwardAmount == 0 || turnAmount == 0)
+                    rigidbody.velocity = Vector3.zero;
                 // Rigidbodyの移動を停止する
             }
         }
@@ -609,7 +618,7 @@ namespace Units.TPS
         internal IEnumerator Crouch(bool active)
         {
             ScaleCapsuleForCrouching(active);
-            m_Animator.SetBool("Crouch", m_Crouching);
+            animator.SetBool("Crouch", Crouching);
 
             if (active)
             {
@@ -617,7 +626,7 @@ namespace Units.TPS
                 while (weight > 0)
                 {
                     weight -= 0.01f;
-                    m_Animator.SetLayerWeight(UpperLayer, weight);
+                    animator.SetLayerWeight(UPPER_LAYER, weight);
                     yield return null;
                 }
                 
@@ -628,7 +637,7 @@ namespace Units.TPS
                 while (weight < 1)
                 {
                     weight += 0.01f;
-                    m_Animator.SetLayerWeight(UpperLayer, weight);
+                    animator.SetLayerWeight(UPPER_LAYER, weight);
                     yield return null;
                 }
             }
@@ -638,10 +647,10 @@ namespace Units.TPS
         {
             if (crouch)
             {
-                if (m_Crouching) return;
-                m_Capsule.height /= 2f;
-                m_Capsule.center /= 2f;
-                m_Crouching = true;
+                if (Crouching) return;
+                capsule.height /= 2f;
+                capsule.center /= 2f;
+                Crouching = true;
             }
             else
             {
@@ -652,9 +661,9 @@ namespace Units.TPS
                 //	m_Crouching = true;
                 //	return;
                 //}
-                m_Capsule.height = m_CapsuleHeight;
-                m_Capsule.center = m_CapsuleCenter;
-                m_Crouching = false;
+                capsule.height = capsuleHeight;
+                capsule.center = capsuleCenter;
+                Crouching = false;
             }
         }
         #endregion
@@ -688,7 +697,7 @@ namespace Units.TPS
         #region Deprecated
         private void OnCollisionEnterTrigger(Collider collider)
         {
-            if (((1 << collider.gameObject.layer) & CollisionObjectLayer) != 0)
+            if (((1 << collider.gameObject.layer) & collisionObjectLayer) != 0)
             {
                 UnitHitsWall = true;
             }
@@ -701,7 +710,7 @@ namespace Units.TPS
 
         private void OnCollisionStay_(Collision collision)
         {
-            if (((1 << collision.gameObject.layer) & CollisionObjectLayer) != 0)
+            if (((1 << collision.gameObject.layer) & collisionObjectLayer) != 0)
             {
                 // もしAddVelocity!=.zeroでdotProduct~=-1.0の場合壁に向かって走っている
                 UnitHitsWall = true;
@@ -709,15 +718,15 @@ namespace Units.TPS
                 // 衝突した面の、接触した点における法線ベクトルを取得
                 var contactNormal = collision.contacts[0].normal;
 
-                var dotProduct = Vector3.Dot(contactNormal, AddVelocity.normalized);
+                var dotProduct = Vector3.Dot(contactNormal, addVelocity.normalized);
                 var angle = Vector3.Angle(contactNormal, Vector3.up);
 
-                if (TakeCoverMinAngle < angle && angle < TakeCoverMaxAngle)
+                if (TAKE_COVER_MIN_ANGLE < angle && angle < TAKE_COVER_MAX_ANGLE)
                 {
-                    if (UnitHitsWallFrameCount == Time.frameCount)
+                    if (unitHitsWallFrameCount == Time.frameCount)
                     {
                         // 2つ以上のカバー可能な壁に張り付いている状態
-                        if (IsCovering)
+                        if (isCovering)
                         {
                             // 現在カバー中
                         }
@@ -725,12 +734,12 @@ namespace Units.TPS
                         {
                             // カバーに入っていない
                             // 2つのカバー可能な壁に同時に接触した
-                            if (dotProduct < WallDotProduct)
+                            if (dotProduct < wallDotProduct)
                             {
                                 // この呼び出しで呼び出されたconverのほうが垂直に接触している
-                                TakeCoverNormal = contactNormal;
-                                WallDotProduct = dotProduct;
-                                IsCovering = true;
+                                takeCoverNormal = contactNormal;
+                                wallDotProduct = dotProduct;
+                                isCovering = true;
                                 AlongWallObject = collision.gameObject;
 
                                 print($"Start covering more: {collision.gameObject}");
@@ -740,16 +749,16 @@ namespace Units.TPS
                     else
                     {
                         // 1つのカバー可能な壁に張り付いている状態
-                        if (IsCovering)
+                        if (isCovering)
                         {
                             // 現在カバー中
                         }
                         else
                         {
                             // カバーに入っていない
-                            TakeCoverNormal = contactNormal;
-                            WallDotProduct = dotProduct;
-                            IsCovering = true;
+                            takeCoverNormal = contactNormal;
+                            wallDotProduct = dotProduct;
+                            isCovering = true;
                             AlongWallObject = collision.gameObject;
                             print($"Start covering 1: {collision.gameObject}");
                         }
@@ -760,16 +769,16 @@ namespace Units.TPS
                     // カバー不能な角度の壁についている
                 }
 
-                UnitHitsWallFrameCount = Time.frameCount;
+                unitHitsWallFrameCount = Time.frameCount;
             }
         }
 
         private void OnCollisionExitTrigger(Collider collider)
         {
-            if (((1 << collider.gameObject.layer) & CollisionObjectLayer) != 0)
+            if (((1 << collider.gameObject.layer) & collisionObjectLayer) != 0)
             {
                 UnitHitsWall = false;
-                IsCovering = false;
+                isCovering = false;
                 print("End covering");
             }
         }
@@ -786,11 +795,11 @@ namespace Units.TPS
             // Searchingアニメーションは上半身の動きのアニメーションのためUpperLayerのブレンドを行う
             // アニメーションは3秒で終了  0.5fはアニメーションの速度
             // Weightは0.57がギリギリ自然 歩いていって停止を挟まずにSearchingに入るとより自然
-            m_Animator.SetLayerWeight(UpperLayer, 0.57f);
-            m_Animator.SetTrigger("Searching");
+            animator.SetLayerWeight(UPPER_LAYER, 0.57f);
+            animator.SetTrigger("Searching");
 
             yield return new WaitForSeconds(3f / 0.5f);
-            m_Animator.SetLayerWeight(UpperLayer, 0);
+            animator.SetLayerWeight(UPPER_LAYER, 0);
         }
 
         /// <summary>
@@ -798,11 +807,11 @@ namespace Units.TPS
         /// </summary>
         internal IEnumerator MakeNoize()
         {
-            m_Animator.SetLayerWeight(UpperLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayerWithMask, 1);
-            m_Animator.SetTrigger("UseItem");
+            animator.SetLayerWeight(UPPER_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER_WITH_MASK, 1);
+            animator.SetTrigger("UseItem");
             yield return new WaitForSeconds(2.4f);
-            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
+            animator.SetLayerWeight(UPPER_LAYER_WITH_MASK, 0);
         }
 
         /// <summary>
@@ -811,11 +820,11 @@ namespace Units.TPS
         internal IEnumerator Killed()
         {
             const float duration = 0.3f;
-            m_Animator.SetLayerWeight(BaseLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
-            m_Animator.SetLayerWeight(OverlayLayer, 1);
-            m_Animator.SetBool("Death", true);
+            animator.SetLayerWeight(BASE_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER_WITH_MASK, 0);
+            animator.SetLayerWeight(OVERLAY_LAYER, 1);
+            animator.SetBool("Death", true);
             yield return new WaitForSeconds(3.5f);
         }
 
@@ -824,11 +833,11 @@ namespace Units.TPS
         /// </summary>
         internal void ResetKilled()
         {
-            m_Animator.SetLayerWeight(BaseLayer, 1);
-            m_Animator.SetLayerWeight(UpperLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
-            m_Animator.SetLayerWeight(OverlayLayer, 0);
-            m_Animator.SetBool("Death", false);
+            animator.SetLayerWeight(BASE_LAYER, 1);
+            animator.SetLayerWeight(UPPER_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER_WITH_MASK, 0);
+            animator.SetLayerWeight(OVERLAY_LAYER, 0);
+            animator.SetBool("Death", false);
         }
 
         /// <summary>
@@ -836,17 +845,17 @@ namespace Units.TPS
         /// </summary>
         internal IEnumerator Victory()
         {
-            m_Animator.SetLayerWeight(BaseLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayerWithMask, 0);
-            m_Animator.SetLayerWeight(OverlayLayer, 1);
-            m_Animator.SetTrigger("Victory");
+            animator.SetLayerWeight(BASE_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER_WITH_MASK, 0);
+            animator.SetLayerWeight(OVERLAY_LAYER, 1);
+            animator.SetTrigger("Victory");
             yield return new WaitForSeconds(4.5f);
             // すべてのモーションをリセット
-            m_Animator.SetLayerWeight(BaseLayer, 1);
-            m_Animator.SetLayerWeight(UpperLayer, 0);
-            m_Animator.SetLayerWeight(UpperLayerWithMask,0);
-            m_Animator.SetLayerWeight(OverlayLayer, 0);
+            animator.SetLayerWeight(BASE_LAYER, 1);
+            animator.SetLayerWeight(UPPER_LAYER, 0);
+            animator.SetLayerWeight(UPPER_LAYER_WITH_MASK,0);
+            animator.SetLayerWeight(OVERLAY_LAYER, 0);
 
         }
 

@@ -31,6 +31,8 @@ public class UserController : MonoBehaviour
     public static bool KeyCodeJump { protected set; get; } = false;
     public static bool KeyCodeDash { protected set; get; } = false;
 
+    public static bool KeyCodeEscape { protected set; get; } = false;
+
     public static bool KeyCodeSetting { protected set; get; } = false;
 
     public static List<bool> NumberCodeDown { protected set; get; } = new List<bool>();
@@ -91,6 +93,15 @@ public class UserController : MonoBehaviour
 
         if (updateMouseInput)
         {
+#if UNITY_EDITOR
+            // Editorからの実行はescキーを押すとカーソルが離れてしまうためF1で代用
+            KeyCodeEscape = Input.GetKeyDown(KeyCode.F1);
+#else
+            // 実機での実行
+            KeyCodeEscape = Input.GetKeyDown(KeyCode.Escape);
+#endif
+
+
             //MouseWheel = Input.GetAxis("Mouse ScrollWheel");
             MouseClickDown = Input.GetMouseButtonDown(0);
             if (MouseClickDown && !MouseGrab)

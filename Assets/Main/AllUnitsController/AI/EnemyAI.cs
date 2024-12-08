@@ -6,6 +6,7 @@ using Units.TPS;
 using UnityEngine;
 using UnityEngine.AI;
 using static Utility;
+using static WaitForSecondsExtensions;
 
 namespace Units.AI
 {
@@ -75,10 +76,36 @@ namespace Units.AI
 
         private EnemyAIMoveState moveState = EnemyAIMoveState.IdleMainRoutine;
 
+        /// <summary>
+        /// 途中でポーズやcancelが行えるwaitforsecondsStoppableに値渡しするためのトリガー
+        /// 注意点として別メソッドが不用意にcancelすると現在waitforsecondsStoppableが動いているコルーチンもキャンセルされる
+        /// </summary>
+        private WaitForSecondsStopableTrigger waitForSecondsTrigger;
+        /// <summary>
+        /// AIがポーズ中であるか
+        /// </summary>
+        public bool IsPause
+        {
+            get => waitForSecondsTrigger.value == WaitForSecondsStopableTriggerEnum.Pause;
+            private set
+            {
+                if (waitForSecondsTrigger.value != WaitForSecondsStopableTriggerEnum.Cancel)
+                {
+                    waitForSecondsTrigger.value = value ? WaitForSecondsStopableTriggerEnum.Pause : WaitForSecondsStopableTriggerEnum.None;
+                }
+                else
+                {
+                    // キャンセルされてAIが終了しているのにポーズを行おうとする不正な操作
+                    PrintWarning("AI is already finished:", gameObject.name);
+                }
+            }
+        }
+
         // Start is called before the first frame update
         void Start()
         {
             navMeshAgent = GetComponent<NavMeshAgent>();
+            waitForSecondsTrigger = new WaitForSecondsStopableTrigger();
         }
 
         // Update is called once per frame
@@ -88,6 +115,9 @@ namespace Units.AI
 
         private void FixedUpdate()
         {
+            if (moveState == EnemyAIMoveState.Finish || IsPause)
+                return;
+
             // SetUnitAsEnemy(List<StageObjects.PointAndStopTime> way)を呼び出してEnemyAIを設定していない場合は何もしない
             if (playerUnitController == null)
                 return;
@@ -117,9 +147,31 @@ namespace Units.AI
             }
         }
 
+        /// <summary>
+        /// Unitの移動及び発見ルーチンを停止する
+        /// </summary>
         internal void StopAI()
         {
+           waitForSecondsTrigger.value = WaitForSecondsStopableTriggerEnum.Cancel;
            moveState = EnemyAIMoveState.Finish;
+        }
+
+        /// <summary>
+        /// Unitの移動及び発見ルーチンを一時停止する
+        /// </summary>
+        internal void PauseAI()
+        {
+            IsPause = true;
+            tpsController.PauseAnimation = true;
+        }
+
+        /// <summary>
+        /// Unitの移動及び発見ルーチンを再開する
+        /// </summary>
+        internal void UnpauseAI()
+        {
+            IsPause = false;
+            tpsController .PauseAnimation = false;
         }
 
         #region Move with AI
@@ -130,6 +182,7 @@ namespace Units.AI
         /// </summary>
         public void StartAI()
         {
+            waitForSecondsTrigger.value = WaitForSecondsStopableTriggerEnum.None;
            // ここでAIのループを開始する
             StartCoroutine(StopAndFindAtCurrentPlace_MainRoutine());
         }
@@ -155,21 +208,24 @@ namespace Units.AI
 
             if (delay > 0)
             {
-                yield return new WaitForSeconds(delay);
+                yield return WaitForSecondsStopable(delay, waitForSecondsTrigger);
             }
 
             currentWayIndex++;
             var nextWay = way[currentWayIndex];
             // ここでFindOutLevelを監視しながら移動が完了するまで待つ
 
-            if (gameObject.name.Contains("Way1 (0)"))
-                Print("MoveToNextWay_MainRoutine", nextWay.stopTime);
-
             StartCoroutine(MoveTo(nextWay.pointTransform.position, nextWay.runToThisPoint));
             var startFindOutLevel = FindOutLevel;
-            yield return new WaitForSeconds(1f);
+            yield return WaitForSecondsStopable(1f, waitForSecondsTrigger);
             while(tpsController.IsAutoMoving && tpsController.IsMoving)
             {
+                if (IsPause)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 // SituationCheckerで状況が変わっていないかを確認
                 // resultがfalseならば移動をキャンセル、SituationCheckerが新しい状況に移動するためのアニメーションを開始する
                 var result = SituationChecker(moveState, startFindOutLevel);
@@ -197,22 +253,22 @@ namespace Units.AI
 
             if (delay > 0)
             {
-                yield return new WaitForSeconds(delay);
-            }
-
-            if (gameObject.name.Contains("Way1 (0)"))
-            {
-
-                Print("StopAndFindAtCurrentPlace_MainRoutine search", currentWay.stopTime);
+                yield return WaitForSecondsStopable(delay, waitForSecondsTrigger);
             }
 
             if (currentWay.stopTime > 0)
             {
                 // 一度見回すアニメーションを再生する
                 StartCoroutine(tpsController.Searching());
-                var startTime = Time.time;
-                while (Time.time - startTime < currentWay.stopTime)
+                var searchDuration = 0f;
+                while (searchDuration < currentWay.stopTime)
                 {
+                    if (IsPause)
+                    {
+                        yield return null;
+                        continue;
+                    }
+
                     var result = SituationChecker(moveState, FindOutLevel);
                     if (!result)
                     {
@@ -221,6 +277,7 @@ namespace Units.AI
                         yield break;
                     }
                     yield return new WaitForSeconds(0.1f);
+                    searchDuration += 0.1f;
                 }
             }
             else if (currentWay.stopTime < 0)
@@ -230,13 +287,15 @@ namespace Units.AI
                 var nextSearchInterval =UnityEngine.Random.Range(9, 15);
                 while (true)
                 {
+                    if (IsPause)
+                    {
+                        yield return null;
+                        continue;
+                    }
+
                     // おおよそ10秒ごとだがランダムにSearchingを再生する
                     if (Time.time - lastSearchiAnimationTime > nextSearchInterval)
                     {
-                        if (gameObject.name.Contains("01"))
-                        {
-                            Print("StopAndFindAtCurrentPlace_MainRoutine search");
-                        }
                         StartCoroutine(tpsController.Searching());
                         lastSearchiAnimationTime = Time.time;
                         nextSearchInterval = UnityEngine.Random.Range(5, 15);
@@ -268,7 +327,7 @@ namespace Units.AI
             moveState = EnemyAIMoveState.MoveToSearch;
             if (delay > 0)
             {
-                yield return new WaitForSeconds(delay);
+                yield return WaitForSecondsStopable(delay, waitForSecondsTrigger);
             }
 
             StartCoroutine(MoveTo(position, true));
@@ -276,6 +335,12 @@ namespace Units.AI
             yield return new WaitForSeconds(0.5f);
             while (tpsController.IsAutoMoving)
             {
+                if (IsPause)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 // SituationCheckerで状況が変わっていないかを確認
                 // resultがfalseならば移動をキャンセル、SituationCheckerが新しい状況に移動するためのアニメーションを開始する
                 var result = SituationChecker(moveState, startFindOutLevel);
@@ -302,7 +367,7 @@ namespace Units.AI
             moveState = EnemyAIMoveState.SearchingIdle;
             if (delay > 0)
             {
-                yield return new WaitForSeconds(delay);
+                yield return WaitForSecondsStopable(delay, waitForSecondsTrigger);
             }
 
             // 何秒で探索を終了するか
@@ -311,10 +376,16 @@ namespace Units.AI
             // TODO 探索アニメーションを再生する
             // 探索が完了したらBackSubRoutineに移行する
             StartCoroutine(tpsController.Searching());
-            float startSearchTime = Time.time;
+            float searchDuration = 0;
             var startFindOutLevel = FindOutLevel;
-            while (Time.time - startSearchTime < stopSearchTime)
+            while (searchDuration < stopSearchTime)
             {
+                if (IsPause)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 var result = SituationChecker(moveState, startFindOutLevel);
                 if (!result)
                 {
@@ -323,6 +394,7 @@ namespace Units.AI
                     yield break;
                 }
                 yield return new WaitForSeconds(0.1f);
+                searchDuration += 0.1f;
             }
 
             // 捜索しても何も見つからなかったためBackSubRoutineに移行する
@@ -337,16 +409,21 @@ namespace Units.AI
             moveState = EnemyAIMoveState.BackToMainRoutine;
             if (delay > 0)
             {
-                yield return new WaitForSeconds(delay);
+                yield return WaitForSecondsStopable(delay, waitForSecondsTrigger);
             }
 
             var currentWay = way[currentWayIndex];
-            print(currentWay.pointTransform.position);
             StartCoroutine(MoveTo(currentWay.pointTransform.position, false));
             var startFindOutLevel = FindOutLevel;
             yield return new WaitForSeconds(0.5f);
             while (tpsController.IsAutoMoving)
             {
+                if (IsPause)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 var result = SituationChecker(moveState, startFindOutLevel);
                 if (!result)
                 {
@@ -369,7 +446,7 @@ namespace Units.AI
             // TODO ここで物音を感知するアニメーションを再生する
             // 物音を感知するアニメーションが終わったらBackToMainRoutineに移行する
             moveState = EnemyAIMoveState.MoveToSearch;
-            yield return new WaitForSeconds(1f);
+            yield return WaitForSecondsStopable(1f, waitForSecondsTrigger);
             headUP.ShowQuestion(0, true);
             yield return new WaitForSeconds(0.5f);
             yield return StartCoroutine(tpsController.RotateTo(playerUnitController.targetCollider.transform.position));
@@ -536,17 +613,8 @@ namespace Units.AI
         /// <param name="location"></param>
         public IEnumerator MoveTo(Vector3 location, bool run)
         {
-            // NavMeshObstacleは他のUnitとの衝突を避けるために使う今回はなしでいい
-            //navMeshObstacle.enabled = false;
-            //navMeshAgent.enabled = true;
-
-            // navMeshAgent.SetDestination(location);
-
             location.y = this.transform.position.y;
             yield return StartCoroutine(tpsController.AutoMove(location, navMeshAgent, run, debug: debugDrawAimWalkingLine));
-            //navMeshAgent.isStopped = true;
-
-            //navMeshAgent.enabled = false;
         }
         #endregion
 
@@ -556,7 +624,7 @@ namespace Units.AI
         /// </summary>
         private void TryFindPlayer()
         {
-            if (FindOutLevel < 1 && moveState != EnemyAIMoveState.Finish)
+            if (FindOutLevel < 1)
             {
                 var dist = GetDistanceIfPlayerInSight();
                 // DOIT deltalevelでalterLevelを超えている場合これが減っていく状態では5秒alterLevelを保持
@@ -570,6 +638,9 @@ namespace Units.AI
                 }
             }
         }
+
+        // TODO 発見フェーズをJobsystemなどの並列処理で軽量化する
+        // 発見は必ずしもタイミングが同じである必要はないため、Jobsystemで並列処理を行い軽量化出来ると思う
 
         /// <summary>
         /// playerUnitControllerが直線距離でfindPlayerDistance以内であり、視界に入っている場合距離を取得

@@ -1266,18 +1266,21 @@ public class ReadOnlyDrawer : PropertyDrawer
 static class WaitForSecondsExtensions
 {
     /// <summary>
-    /// <see cref="WaitForSecondsStopable(float, Trigger)"/>のTrigger用class (IEnumeratorは参照渡しができないため代案として)
+    /// <see cref="WaitForSecondsStopable(float, WaitForSecondsStopableTrigger)"/>のTrigger用Enum
     /// </summary>
-    public class Trigger
+    public enum WaitForSecondsStopableTriggerEnum
     {
-        /// <summary>
-        /// 一時停止
-        /// </summary>
-        public bool pause = false;
-        /// <summary>
-        /// WaitForSecondsをcancelする
-        /// </summary>
-        public bool cancel = false;
+        None,
+        Pause,
+        Cancel
+    }
+
+    /// <summary>
+    /// <see cref="WaitForSecondsStopable(float, WaitForSecondsStopableTrigger)"/>のTrigger用class (IEnumeratorは参照渡しができないため代案として)
+    /// </summary>
+    public class WaitForSecondsStopableTrigger
+    {
+        public WaitForSecondsStopableTriggerEnum value = WaitForSecondsStopableTriggerEnum.None;
     }
 
     /// <summary>
@@ -1286,19 +1289,19 @@ static class WaitForSecondsExtensions
     /// <param name="seconds"></param>
     /// <param name="trigger"></param>
     /// <returns></returns>
-    public static IEnumerator WaitForSecondsStopable(float seconds, Trigger trigger)
+    public static IEnumerator WaitForSecondsStopable(float seconds, WaitForSecondsStopableTrigger trigger)
     {
         var stopTime = 0.0;
         var now = DateTime.Now;
         while ((DateTime.Now - now).TotalMilliseconds - stopTime < seconds * 1000)
         {
-            if (trigger.cancel)
+            if (trigger.value == WaitForSecondsStopableTriggerEnum.Cancel)
                 break;
 
-            if (trigger.pause)
+            if (trigger.value == WaitForSecondsStopableTriggerEnum.Pause)
             {
                 var start = DateTime.Now;
-                while (trigger.pause)
+                while (trigger.value == WaitForSecondsStopableTriggerEnum.Pause)
                     yield return null;
                 stopTime += (DateTime.Now - start).TotalMilliseconds;
             }

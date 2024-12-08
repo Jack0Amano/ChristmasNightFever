@@ -56,13 +56,6 @@ namespace Units
             TPSController = GetComponent<ThirdPersonUserControl>();
             audioSource = GetComponent<AudioSource>();
 
-            if (cameraUserController != null)
-            {
-                Print("Debug mode is enabled");
-                UserController.enableCursor = false;
-                TPSController.IsTPSControllActive = true;
-                StartCoroutine(cameraUserController.ChangeModeFollowTarget(TPSController));
-            }
             TPSController.makeNoiseAction +=  MakeNoizeEvent;
             SEController = GetComponent<SEController>();
         }
@@ -70,6 +63,14 @@ namespace Units
         // Start is called before the first frame update
         void Start()
         {
+            if (cameraUserController != null)
+            {
+                Print("Debug mode is enabled. Controlling", gameObject.name);
+                UserController.enableCursor = false;
+                TPSController.IsTPSControllActive = true;
+                print(TPSController);
+                StartCoroutine(cameraUserController.SetAsFollowTarget(TPSController));
+            }
         }
 
         // Update is called once per frame
@@ -79,14 +80,38 @@ namespace Units
 
         private void FixedUpdate()
         {
+            
         }
 
         /// <summary>
         /// ゲームを開始する
         /// </summary>
-        internal void StartToGame()
+        internal void StartGame()
         {
             EnemyAI?.StartAI();
+        }
+
+        /// <summary>
+        /// Unitの操作及び行動を一時停止する
+        /// </summary>
+        internal void PauseGame()
+        {
+            if (unitType == UnitType.Player)
+            {
+                TPSController.IsTPSControllActive = false;
+            }
+            else
+            {
+                EnemyAI?.StopAI();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal void UnpauseGame()
+        {
+
         }
 
         /// <summary>
@@ -123,7 +148,7 @@ namespace Units
             }
         }
 
-        #region アニメーションなどを含むアクションを起こす
+        #region アニメーションなどを含むアクションを起こす もしくはアクションを受け取る
         /// <summary>
         /// ユニットが物音を立てる
         /// </summary>
@@ -162,7 +187,6 @@ namespace Units
         /// </summary>
         internal void FoundYou(UnitController sender)
         {
-            Print(sender, this);
 
             IEnumerator _WinVoice()
             {

@@ -202,8 +202,6 @@ namespace Units.Icon
             if (Type == HeadUpIconType.None || Type == HeadUpIconType.ShowForceQuestion)
                 return;
 
-            print(Type);
-
             questionMaterial.SetFloat("_Level", 0);
             var seq = DOTween.Sequence();
             //var showTime = Time.time - showExculamationTime;

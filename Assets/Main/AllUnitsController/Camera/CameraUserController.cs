@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Cinemachine;
+using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Cinemachine;
-using DG.Tweening;
-using static Utility;
 using System.Runtime.CompilerServices;
-using DG.Tweening.Core.Easing;
 using Units.TPS;
+using UnityEngine;
+using static Utility;
 
 namespace Units
 {
+
+    /// <summary>
+    /// カメラ間の遷移をスムーズに行うためのコントローラー
+    /// </summary>
     public class CameraUserController : MonoBehaviour
     {
         [Tooltip("カメラのマウスコントロールの是非")]
@@ -48,25 +50,10 @@ namespace Units
         public bool lockToRearOfTarget = false; // Lock camera to rear of target 
         public bool allowMouseInputX = true; // Allow player to control camera angle on the X axis (Left/Right) 
         public bool allowMouseInputY = true; // Allow player to control camera angle on the Y axis (Up/Down) 
-        [Tooltip("FollowCameraの横にずれる距離")]
-        [SerializeField] float FollowCameraXAxisGap = 0.5f;
 
-        [Header("Free Camera Properties")]
-        [Tooltip("自由な移動を行えるカメラ")]
-        [SerializeField] CinemachineVirtualCamera virtualFreeCamera;
-        [Tooltip("FreeCameraの加速度")]
-        public float freeCameraSpeed = 0.05f;
-        [Tooltip("FreeCameraの開始時の初期位置でTargetからどれだけ離れているか")]
-        public float distanceOfStartFreeCamera = 5;
+        [Tooltip("カメラの遷移を行う際にカメラ間でrayを飛ばしてこのmaskの障害物がある場合はCutBlendを使用する")]
+        [SerializeField] private LayerMask useCutBlendCameraMask;
 
-        [Header("Stationary Camera Properties")]
-        [Tooltip("StationaryCameraの位置を更新する時間")]
-        [SerializeField] float updatePositionDuration = 1;
-        /// <summary>
-        /// StationaryCameraの位置のアップデートを停止する
-        /// </summary>
-        [Tooltip("StationaryCameraのEnemyの移動によるVirtualCameraのPositionの行進を停止する")]
-        [SerializeField,ReadOnly] public bool lockStationaryCameraPosition = false;
 
         [Header("Start prepare caemra")]
         [Tooltip("カメラ切り替えの際にカメラの移動をCutにする距離")]
@@ -79,10 +66,8 @@ namespace Units
 
         public Camera MainCamera { private set; get; }
 
-        /// <summary>
-        /// Followカメラが操作されていないときにターゲットの裏に自動的に回り込む機能を停止
-        /// </summary>
-        public bool StopAutoRotateBehindTarget = true;
+        [Tooltip("Followカメラが操作されていないときにターゲットの裏に自動的に回り込む機能")]
+        [SerializeField] bool autoRotateBehindTarget = true;
 
         /// <summary>
         /// カットして瞬時にカメラ移動するblend
@@ -124,17 +109,6 @@ namespace Units
         /// </summary>
         public CinemachineVirtualCamera ActiveVirtualCamera { private set; get; }
         /// <summary>
-        /// 現在Activeなカメラを持つUnitController
-        /// </summary>
-        public UnitController ActiveUnitController
-        {
-            get
-            {
-                if (ActiveTPSController == null) return null;
-                return ActiveTPSController.UnitController;
-            }
-        }
-        /// <summary>
         /// Followなどの際に中心に置かれるUserController
         /// </summary>
         public ThirdPersonUserControl ActiveTPSController { private set; get; }
@@ -159,15 +133,7 @@ namespace Units
         /// Maincameraの移動brain
         /// </summary>
         CinemachineBrain cinemachineBrain;
-        /// <summary>
-        /// StationaryPositionが変更されるまでの時間
-        /// </summary>
-        private float timeLastStationaryPositionUpdate = 0;
-        private List<UnitController> watchingUnitsAtStationaryMode;
-        /// <summary>
-        /// StationaryCameraを使う時のraycastのmask
-        /// </summary>
-        private int stationaryCameraMask;
+
         /// <summary>
         /// Cinemachineによるカメラ移動の時間
         /// </summary>
@@ -180,49 +146,19 @@ namespace Units
         /// </summary>
         private bool allowMouseWheel = true;
 
-        GameManager gameManager;
-        /// <summary>
-        /// FollowCameraを左右にずらすアニメーションのsequence
-        /// </summary>
-        Sequence changeFollowCameraCenterPositionAnimation;
-        /// <summary>
-        /// OverShoulderCaemraのRotationX
-        /// </summary>
-        public float OverShoulderCameraRotationX { private set; get; }
-
         /// <summary>
         /// CameraUserControllerが初期化されたか
         /// </summary>
         public bool IsActivated { private set; get; } = false;
-
-        /// <summary>
-        /// StationaryCameraの場合現在観測しているUnit
-        /// </summary>
-        public UnitController WatchingUnitAtStationaryMode 
-        {
-            get
-            {
-                if (Mode == CameraMode.Stationary)
-                    return watchingUnitAtStationaryMode;
-                else
-                    return null;
-            }
-            set => watchingUnitAtStationaryMode = value;
-        }
-        private UnitController watchingUnitAtStationaryMode;
-
-        /// <summary>
-        /// Override状態のCameraが存在するか
-        /// </summary>
-        public bool IsOverrideCameraActive { private set; get; } = false;   
 
 
         #region Base functions
         private void Awake()
         {
             MainCamera = this.GetComponent<Camera>();
-            stationaryCameraMask = LayerMask.GetMask(new string[] { "Object", "SeeThrough" });
-            gameManager = GameManager.Instance;
+            cinemachineBrain = MainCamera.GetComponent<CinemachineBrain>();
+            if (cinemachineBrain == null)
+                PrintError("CinemachineBrain is not attached to MainCamera");
             Mode = CameraMode.Follow;
         }
 
@@ -235,11 +171,7 @@ namespace Units
             currentDistance = distance;
             desiredDistance = distance;
             correctedDistance = distance;
-
-            cinemachineBrain = MainCamera.GetComponent<CinemachineBrain>();
-            if (cinemachineBrain == null)
-                PrintError("CinemachineBrain is not attached to MainCamera");
-
+          
             SetCutBlend();
 
             // Make the rigid body not change rotation 
@@ -259,14 +191,7 @@ namespace Units
         {
             //if (gameManager != null && (gameManager.StartCanvasController.IsEnable))
             //    return;
-
-            if (Mode == CameraMode.Free)
-            {
-                if (!enableCameraControlling)
-                    return;
-                FreeCameraUpdate(ActiveTPSController);
-            }
-            else if (Mode == CameraMode.Follow)
+            if (Mode == CameraMode.Follow)
             {
                 if (TargetToFollow == null || IsOnAnimation || !enableCameraControlling)
                     return;
@@ -274,151 +199,18 @@ namespace Units
                 if (UserController.ChangeFollowCameraPositionRightOrLeft)
                     ChangeFollowCameraXAxisGap();
             }
-            else if (Mode == CameraMode.FollowMortar)
-            {
-                if (TargetToFollow == null || IsOnAnimation || !enableCameraControlling)
-                    return;
-                FollowCameraUpdate(FollowObject, TargetToFollow);
-            }
-            else if (Mode == CameraMode.Stationary)
-            {
-                if (TargetToFollow == null || !enableCameraControlling)
-                    return;
-                UpdatePositionStationaryCameraAtNear();
-            }
-            else if (Mode == CameraMode.OverShoulder)
-            {
-                if (TargetToFollow == null || IsOnAnimation || !enableCameraControlling)
-                    return;
-                UpdateOverShoulderCamera();
-            }
-            else if (Mode == CameraMode.OverShoulderFar)
-            {
-                if (TargetToFollow == null || IsOnAnimation || !enableCameraControlling)
-                    return;
-                UpdateOverShoulderCameraFar();
-            }
                 
         }
         #endregion
 
-        #region Tablet Camera Mode
-        /// <summary>
-        /// StartTabletを見る形のカメラモード
-        /// </summary>
-        /// <returns>Tabletがカメラに映る位置</returns>
-        public void ChangeModeTacticsTablet()
-        {
-            //Mode = CameraMode.TacticsTablet;
-
-            //if (TacticsTablet == null)
-            //    PrintError("TabletCinemachineVirtualCamera is not set");
-            
-            //StartCoroutine( ActivateVirtualCamera(TacticsTablet.CinemachineVirtualCamera, null));
-        }
-
-        /// <summary>
-        /// すべてのTabletCaemraのPriortyを0にする
-        /// </summary>
-        private void ClearAllTabletCamera()
-        {
-            //TacticsTablet.CinemachineVirtualCamera.Priority = 0;
-        }
-
-        /// <summary>
-        /// ChangeModeTacticsTabletを呼び出す前のカメラモード
-        /// </summary>
-        private CameraMode previousMode;
-        /// <summary>
-        /// ChangeModeOverlayTacticsTabletを呼び出す前のTPSController
-        /// </summary>
-        private ThirdPersonUserControl previousTPSController;
-        ///<summary>
-        /// TacticsTabletをOnTacticePanelを表示する形で見る 割り込み型のため DisableOverlayTacticsTabletで元のカメラに戻れる
-        /// unitsController.UnitsListにPlayerがいない場合動作しない
-        /// </summary>
-        //public UnitController ChangeModeOverlayTacticsTablet()
-        //{
-        //    Print($"ChangeModeOverlayTacticsTablet: Mode({Mode})");
-        //    if (Mode == CameraMode.TacticsTablet) return null;
-        //    previousMode = Mode;
-        //    previousTPSController = ActiveTPSController;
-
-        //    Mode = CameraMode.TacticsTablet;
-        //    UnitController unitWatchingTablet = null ;
-        //    if (WatchingUnitAtStationaryMode && WatchingUnitAtStationaryMode.Attribute == UnitAttribute.PLAYER)
-        //    {
-        //        unitWatchingTablet = WatchingUnitAtStationaryMode;
-        //        //TacticsTablet.ShowOnTacticsPanel(WatchingUnitAtStationaryMode, WindowTabType.None);
-        //    }
-        //    else
-        //    {
-        //        if (!unitsController.UnitsList.TryFindFirst(u => u.Attribute == UnitType.Player, out unitWatchingTablet))
-        //        {
-        //            Print("Player is not found");
-        //            return null;
-        //        }
-        //    }
-            
-        //    StartCoroutine(ActivateVirtualCamera(TacticsTablet.CinemachineVirtualCamera, null));
-        //    IsOverrideCameraActive = true;
-        //    return unitWatchingTablet;
-        //}
-
-        /// <summary>
-        /// OverrideでPriorityが変更されたTacticsTabletのカメラを元のカメラに戻す
-        /// </summary>
-        public void DisableOverlayTacticsTablet()
-        {
-            if (Mode != CameraMode.TacticsTablet || !IsOverrideCameraActive) return;
-
-            if (previousMode == CameraMode.Stationary)
-            {
-                ChangeModeStationaryAtNear(watchingUnitAtStationaryMode);
-                return;
-            }
-            else if (previousMode == CameraMode.Subjective)
-            {
-                ChangeModeSubjective();
-                return;
-            }
-
-
-            if (previousTPSController != null)
-            {
-                if (previousMode == CameraMode.Follow)
-                {
-                    StartCoroutine(ChangeModeFollowTarget(previousTPSController));
-                    return;
-                }
-                else if (previousMode == CameraMode.Subjective)
-                {
-                    ChangeModeSubjective();
-                    return;
-                }
-                else if (previousMode == CameraMode.OverShoulder)
-                {
-                    ChangeModeOverShoulder(previousTPSController.UnitController);
-                    return;
-                }
-                else if (previousMode == CameraMode.OverShoulderFar)
-                {
-                    ChangeModeOverShoulderFar(previousTPSController.UnitController);
-                    return;
-                }
-            }
-            else
-            {
-                PrintError($"ActiveTPSController is not set: previousCameraMode({previousMode})");
-                return;
-            }
-            PrintError($"previousCameraMode({previousMode}) is not supported");
-        }
-        #endregion
 
         #region Follow Unit Camera Mode
-
-        public IEnumerator ChangeModeFollowTarget(ThirdPersonUserControl thirdPersonUserControl)
+        /// <summary>
+        /// FollowVirtualCameraを持っているTPSCOntrollerを追従対象に切り替え
+        /// </summary>
+        /// <param name="thirdPersonUserControl"></param>
+        /// <returns></returns>
+        public IEnumerator SetAsFollowTarget(ThirdPersonUserControl thirdPersonUserControl)
         {
             if (Mode == CameraMode.Follow && thirdPersonUserControl == ActiveTPSController) yield break ;
 
@@ -426,24 +218,22 @@ namespace Units
             allowMouseWheel = true;
 
             SetFollowCameraXAxisGap(thirdPersonUserControl, false);
-            StartCoroutine(ActivateVirtualCamera(thirdPersonUserControl.followCamera, thirdPersonUserControl));
-            yield return StartCoroutine(ChangeFollowTarget(thirdPersonUserControl.followCamera, 
-                                                                thirdPersonUserControl.followCameraParent,
-                                                                thirdPersonUserControl.FollowCameraCenter));
+            StartCoroutine(ActivateVirtualCamera(thirdPersonUserControl.followCamera));
+            yield return StartCoroutine(ChangeFollowTarget(thirdPersonUserControl));
         }
 
         /// <summary>
         /// FollowするTargetを切り替える
         /// </summary>
         /// <param name="target"></param>
-        private IEnumerator ChangeFollowTarget(CinemachineVirtualCamera followCamera, 
-                                                    GameObject followObject,
-                                                    GameObject targetToFollow,
-                                                    float defaultDistance = 3)
+        private IEnumerator ChangeFollowTarget(ThirdPersonUserControl tpsController, float defaultDistance = 3)
         {
+            var followObject = tpsController.followCameraParent;
+            var targetToFollow = tpsController.FollowCameraCenter;
 
             allowMouseInputY = true;
             timeDeltaFromControlled = 0;
+            ActiveTPSController = tpsController;
             this.TargetToFollow = targetToFollow;
             FollowObject = followObject;
 
@@ -498,19 +288,17 @@ namespace Units
                 if (!lockToRearOfTarget)
                     rotateBehind = false;
 
-                if (Mode != CameraMode.OverShoulder)
-                {
-                    // ease behind the target if the character is not controlled
-                    bool isNotControlled = MouseDeltaX == 0 && MouseDeltaY == 0;
-                    if (isNotControlled)
-                        timeDeltaFromControlled += Time.deltaTime;
-                    else
-                        timeDeltaFromControlled = 0;
 
-                    if ((rotateBehind || timeDeltaFromControlled > cameraRotateBehindSecond) && !StopAutoRotateBehindTarget)
-                    {
-                        //RotateBehindTarget(true);
-                    }
+                // ease behind the target if the character is not controlled
+                bool isNotControlled = MouseDeltaX == 0 && MouseDeltaY == 0;
+                if (isNotControlled)
+                    timeDeltaFromControlled += Time.deltaTime;
+                else
+                    timeDeltaFromControlled = 0;
+
+                if ((rotateBehind || timeDeltaFromControlled > cameraRotateBehindSecond) && autoRotateBehindTarget)
+                {
+                    RotateBehindTarget(true);
                 }
             }
 
@@ -627,232 +415,16 @@ namespace Units
 
         #endregion
 
-        #region Aiming Camera Mode
+        #region Free camera mode
+        // 別個のVirtualCameraに対して遷移を行う
         /// <summary>
-        /// エイムモードを主観視点に変更する
+        /// このVirtualCameraをアクティブにし、以前のVirtualCameraを非アクティブにする
         /// </summary>
-        /// <param name="active"></param>
-        public void ChangeModeSubjective()
+        /// <param name="freeCamera"></param>
+        public void SetFreeCameraMode(CinemachineVirtualCamera freeCamera)
         {
-            if (ActiveTPSController == null || Mode == CameraMode.Subjective) return;
-
-            Mode = CameraMode.Subjective;
-            StartCoroutine(ActivateVirtualCamera(ActiveTPSController.aimCamera, ActiveTPSController));
-            allowMouseInputY = false;
-        }
-        #endregion
-
-        #region Over shoulder camera mode
-        /// <summary>
-        /// 肩越しで操作を行うカメラモード
-        /// </summary>
-        /// <param name="thirdPersonUserControl"></param>
-        public void ChangeModeOverShoulder(UnitController active)
-        {
-            ActiveTPSController = active.TPSController;
-            if (Mode == CameraMode.OverShoulder) return;
-
-            ActiveTPSController.OverShoulderCameraParent.transform.rotation = Quaternion.Euler(ActiveTPSController.OverShoulderCameraDefaultXRotation, 0, 0);
-            OverShoulderCameraRotationX = ActiveTPSController.OverShoulderCameraDefaultXRotation;
-
-            SetEraceInOutBlend();
-            Mode = CameraMode.OverShoulder;
-            allowMouseWheel = false;
-            Print(ActiveTPSController.OverShoulderCamera, ActiveTPSController) ;
-            StartCoroutine(ActivateVirtualCamera(ActiveTPSController.OverShoulderCamera, ActiveTPSController));
-        }
-
-        /// <summary>
-        /// 少し離れた箇所のカメラ位置
-        /// </summary>
-        /// <param name="thirdPersonUserControl"></param>
-        public void ChangeModeOverShoulderFar(UnitController active)
-        {
-            ActiveTPSController = active.TPSController;
-            if (Mode == CameraMode.OverShoulderFar) return;
-
-            ActiveTPSController.OverShoulderCameraParent.transform.rotation = Quaternion.Euler(ActiveTPSController.OverShoulderCameraDefaultXRotation, 0, 0);
-            OverShoulderCameraRotationX = ActiveTPSController.OverShoulderCameraDefaultXRotation;
-
-            SetEraceInOutBlend();
-            Mode = CameraMode.OverShoulderFar;
-            allowMouseWheel = false;
-            //StartCoroutine(_ChangeModeFollowTarget(thirdPersonUserControl, 2));
-            StartCoroutine(ActivateVirtualCamera(ActiveTPSController.OverShoulderCameraFar, ActiveTPSController));
-        }
-
-        /// <summary>
-        /// OverShoulderCameraの上下移動をUpdateする
-        /// </summary>
-        public void UpdateOverShoulderCamera()
-        {
-            MouseDeltaY = UserController.MouseDeltaY * ySpeed * 0.02f;
-            OverShoulderCameraRotationX -= MouseDeltaY;
-            if (OverShoulderCameraRotationX >= ActiveTPSController.OverShoulderCameraMaxXRotation)
-                OverShoulderCameraRotationX = ActiveTPSController.OverShoulderCameraMaxXRotation;
-            else if (OverShoulderCameraRotationX <= ActiveTPSController.OverShoulderCameraMinXRotation)
-                OverShoulderCameraRotationX = ActiveTPSController.OverShoulderCameraMinXRotation;
-            ActiveTPSController.OverShoulderCameraParent.localRotation = Quaternion.Euler(OverShoulderCameraRotationX, 0, 0);
-        }
-
-        /// <summary>
-        /// OverShoulderCameraFarの上下移動をUpdateする
-        /// </summary>
-        public void UpdateOverShoulderCameraFar()
-        {
-              MouseDeltaY = UserController.MouseDeltaY * ySpeed * 0.02f;
-            OverShoulderCameraRotationX -= MouseDeltaY;
-            if (OverShoulderCameraRotationX >= ActiveTPSController.OverShoulderCameraMaxXRotation)
-                OverShoulderCameraRotationX = ActiveTPSController.OverShoulderCameraMaxXRotation;
-            else if (OverShoulderCameraRotationX <= ActiveTPSController.OverShoulderCameraMinXRotation)
-                OverShoulderCameraRotationX = ActiveTPSController.OverShoulderCameraMinXRotation;
-            ActiveTPSController.overShoulderCameraFarParent.localRotation = Quaternion.Euler(OverShoulderCameraRotationX, 0, 0);
-        }
-        #endregion
-
-        #region Stationary camera at near position
-        /// <summary>
-        /// 射線とかは考えずにただ単に近いUnitの場所から敵を追跡する
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="callerName"></param>
-        public void ChangeModeStationaryAtNear(UnitController target, [CallerMemberName] string callerName = "")
-        {
-            //Print(FuncName(), target, callerName);
-            //this.Mode = CameraMode.Stationary;
-
-            //TargetToFollow = target.headUpIconPosition.gameObject;
-
-            //watchingUnitsAtStationaryMode = unitsController.UnitsList.FindAll(u => u.Attribute != target.Attribute);
-            //UpdatePositionStationaryCameraAtNear();
-        }
-
-        /// <summary>
-        /// Stationary cameraを位置をtargetToFollowに最も近いものに変更する
-        /// </summary>
-        /// <returns></returns>
-        private bool UpdatePositionStationaryCameraAtNear()
-        {
-            //if (watchingUnitsAtStationaryMode.Count == 0) return false;
-            //if (lockStationaryCameraPosition ||
-            //    Time.time - timeLastStationaryPositionUpdate < updatePositionDuration)
-            //{
-            //    watchingUnitAtStationaryMode = null;
-            //    return false;
-            //}
-                
-            //List<(UnitController unit, int dist)> distances = watchingUnitsAtStationaryMode.ConvertAll(u => 
-            //{ 
-            //    return (u, (int)Vector3.Distance(u.stationaryCamera.transform.position, TargetToFollow.transform.position)); 
-            //});
-
-            //distances.RemoveAll(d => d.dist == int.MaxValue);
-            //if (distances.Count == 0)
-            //{
-            //    watchingUnitsAtStationaryMode.ForEach(u => u.stationaryCamera.LookAt = null);
-            //    return false;
-            //}
-            //distances.Sort((a, b) => a.dist - b.dist);
-
-            //distances.Select((unit, index) => (unit, index)).ToList().ForEach(item =>
-            //{
-            //    if (item.index == 0)
-            //    {
-            //        watchingUnitAtStationaryMode = item.unit.unit;
-            //        watchingUnitAtStationaryMode.stationaryCamera.LookAt = TargetToFollow.transform;
-            //        StartCoroutine(ActivateVirtualCamera(item.unit.unit.stationaryCamera, null));
-            //    }
-            //    else
-            //    {
-            //        item.unit.unit.stationaryCamera.Priority = 0;
-            //    }
-            //});
-            return true;
-        }
-        #endregion
-
-        // Deprecated
-        #region Free camera mode　*Deprecated*
-        [Obsolete("This function is deprecated and should no longer be used.")]
-        /// <summary>
-        /// カメラをフリーモードにする
-        /// </summary>
-        /// <param name="active"></param>
-        public void ChangeModeFree([CallerMemberName] string callerName = "")
-        {
-            // TODO FreeCameraの移動制限(Activeから一定以上離れれない)をつけるか？
-            // freeCameraをTargetの後ろdistanceOfStartFreeCameraだけ離れた位置に初期化
-            var rad = ActiveTPSController.transform.rotation.eulerAngles.y * Mathf.Deg2Rad;
-            rad -= 180 * Mathf.Deg2Rad;
-
-            Print(FuncName(), callerName);
-
-            var newPos = ActiveTPSController.transform.position;
-            newPos.x += Mathf.Sin(rad) * distanceOfStartFreeCamera;
-            newPos.z += Mathf.Cos(rad) * distanceOfStartFreeCamera;
-            newPos.y = virtualFreeCamera.transform.position.y;
-
-            virtualFreeCamera.transform.position = newPos;
-            virtualFreeCamera.transform.LookAt(ActiveTPSController.transform.position);
-
-            Mode = CameraMode.Free;
-            ActiveTPSController.IsTPSControllActive = false;
-            StartCoroutine(ActivateVirtualCamera(virtualFreeCamera, null));
-            if (ActiveTPSController != null)
-            {
-                ActiveTPSController.followCamera.Priority = 1;
-                ActiveTPSController.aimCamera.Priority = 1;
-            }
-        }
-
-        [Obsolete("This function is deprecated and should no longer be used.")]
-        /// <summary>
-        /// Free Cameraの移動
-        /// </summary>
-        /// <param name="activeTPSController"></param>
-        private void FreeCameraUpdate(ThirdPersonUserControl activeTPSController)
-        {
-            MouseDeltaX = UserController.MouseDeltaX * xSpeed * 0.02f;
-            MouseDeltaY = UserController.MouseDeltaY * ySpeed * 0.02f;
-            var _rotation = virtualFreeCamera.transform.rotation.eulerAngles;
-
-            _rotation.x -= MouseDeltaY;
-            _rotation.y += MouseDeltaX;
-            _rotation.z = 0;
-
-            if (_rotation.x > 270)
-                _rotation.x -= 360;
-
-            if (_rotation.x > 85)
-                _rotation.x = 85;
-            else if (_rotation.x < -85)
-                _rotation.x = -85;
-
-            virtualFreeCamera.transform.rotation = Quaternion.Euler(_rotation);
-
-            if (UserController.KeyVertical != 0 || UserController.KeyHorizontal != 0)
-            {
-
-                var forward = Mathf.Deg2Rad * virtualFreeCamera.transform.rotation.eulerAngles.y;
-                var forwardDeltaX = Mathf.Sin(forward) * UserController.KeyVertical;
-                var forwardDeltaZ = Mathf.Cos(forward) * UserController.KeyVertical;
-                var vectForward = new Vector2(forwardDeltaX, forwardDeltaZ);
-
-                var side = Mathf.Deg2Rad * virtualFreeCamera.transform.rotation.eulerAngles.y;
-                side += 90 * Mathf.Deg2Rad;
-                var sideDeltaX = Mathf.Sin(side) * UserController.KeyHorizontal;
-                var sideDeltaZ = Mathf.Cos(side) * UserController.KeyHorizontal;
-                var vectSide = new Vector2(sideDeltaX, sideDeltaZ);
-
-                var vect = vectForward + vectSide;
-                vect *= Max(Mathf.Abs(UserController.KeyHorizontal), Mathf.Abs(UserController.KeyVertical)) * freeCameraSpeed;
-
-                var newPos = virtualFreeCamera.transform.position;
-                newPos.x += vect.x;
-                newPos.z += vect.y;
-
-                virtualFreeCamera.transform.position = newPos;
-            }
+            Mode = CameraMode.None;
+            StartCoroutine(ActivateVirtualCamera(freeCamera));
         }
         #endregion
 
@@ -879,67 +451,13 @@ namespace Units
         }
 
         /// <summary>
-        /// 指定したCameraのPriorityを上げ、それ以外のPriorityを下げる
-        /// </summary>
-        /// <param name="cam"></param>
-        /// <param name="thirdPersonUserControl"></param>
-        private void RizeAndDecreasePriority(CinemachineVirtualCamera cam, ThirdPersonUserControl thirdPersonUserControl)
-        {
-            Print($"RizeAndDecreasePriority({cam.gameObject.name}), TPSController({thirdPersonUserControl}), ActiveTPS({ActiveTPSController})");
-            // TPSControllerがあるObject付随のカメラがtargetのカメラの場合はこれをアクティブにしそれ以外のカメラを非アクティブにする
-            bool EnableCamerasPriority(ThirdPersonUserControl thirdPersonUserControl, CinemachineVirtualCamera target)
-            {
-                if (thirdPersonUserControl == null) return false;
-                var output = false;
-                //unitsController.UnitsList.ForEach(u =>
-                //{
-                //    // UnitControllerが破棄されている場合は無視
-                //    if (u == null) return;
-                    
-                //    if (u != null && u.TpsController == thirdPersonUserControl)
-                //    {
-                //        u.TpsController.CinemachineVirtualCameras.ForEach(c =>
-                //        {
-                //            if (c == target)
-                //            {
-                //                output = true;
-                //                c.Priority = 10;
-                //            }
-                //            else
-                //            {
-                //                c.Priority = 0;
-                //            }
-                //        });
-                //    }
-                //});
-                return output;
-            }
-
-            if (thirdPersonUserControl != ActiveTPSController)
-            {
-                EnableCamerasPriority(thirdPersonUserControl, cam);
-                EnableCamerasPriority(ActiveTPSController, cam);
-                ActiveTPSController = thirdPersonUserControl;
-            }
-            else
-            {
-                EnableCamerasPriority(ActiveTPSController, cam);
-            }
-
-            if (virtualFreeCamera != null)
-                virtualFreeCamera.Priority = virtualFreeCamera == cam ? 10 : 0;
-            //TacticsTablet.CinemachineVirtualCamera.Priority = TacticsTablet.CinemachineVirtualCamera == cam ? 10 : 0;
-        }
-
-        /// <summary>
         /// 与えられたVirtualCameraのPriorityを上げる、それ以外のcameraのPriorityは下げる
         /// </summary>
         /// <param name="cam">アクティブにするVirtualCamera</param>
         /// <param name="thirdPersonUserControl">新しいTPSControllerがあればこれをセットする 以前のTPSCamのCameraは非アクティブになる</param>
-        private IEnumerator ActivateVirtualCamera(CinemachineVirtualCamera cam, ThirdPersonUserControl thirdPersonUserControl)
+        private IEnumerator ActivateVirtualCamera(CinemachineVirtualCamera cam)
         {
             yield return null;
-            IsOverrideCameraActive = false;
 
             // カメラの遷移でカメラ間の距離が離れている場合はCutBlendを使用する
             var cameraModeCut = false;
@@ -950,7 +468,7 @@ namespace Units
 
             // カメラの遷移でカメラ間に障害物がある場合はCutBlendを使用する
             var ray = new Ray(MainCamera.transform.position, direction * 30);
-            if (Physics.Raycast(ray, out var hit, 100, stationaryCameraMask))
+            if (Physics.Raycast(ray, out var hit, 100, useCutBlendCameraMask))
             {
                 if (hit.distance < distOldToNewCamera)
                     cameraModeCut = true;
@@ -958,17 +476,16 @@ namespace Units
 
             if (cameraModeCut)
             {
-                //var fadeInOutCanvas = gameManager.FadeInOutCanvas;
-                //SetCutBlend();
-                //yield return StartCoroutine(fadeInOutCanvas.Show(0.25f));
-                //RizeAndDecreasePriority(cam, thirdPersonUserControl);
-                //yield return StartCoroutine(fadeInOutCanvas.Hide(0.25f));
+                SetCutBlend();
             }
             else
             {
                 SetEraceInOutBlend();
-                RizeAndDecreasePriority(cam, thirdPersonUserControl);
             }
+            if (ActiveVirtualCamera != null)
+                ActiveVirtualCamera.Priority = 0;
+            cam.Priority = 1;
+
             ActiveVirtualCamera = cam;
 
         }
@@ -984,36 +501,8 @@ namespace Units
     {
         None,
         /// <summary>
-        /// キーによって一定高度を移動するカメラ
-        /// </summary>
-        Free,
-        /// <summary>
-        //　肩越し視点
-        /// </summary>
-        OverShoulder,
-        /// <summary>
-        /// 肩越しで少し離れた視点
-        /// </summary>
-        OverShoulderFar,
-        /// <summary>
-        /// 主観視点
-        /// </summary>
-        Subjective,
-        /// <summary>
         /// TPSでUnitの周りを周回する
         /// </summary>
-        Follow,
-        /// <summary>
-        /// Mortarの周囲でカメラを移動
-        /// </summary>
-        FollowMortar,
-        /// <summary>
-        /// 位置から定点観測
-        /// </summary>
-        Stationary,
-        /// <summary>
-        /// 開始地点のTabletを見るようにCameraが設置されている
-        /// </summary>
-        TacticsTablet,
+        Follow
     }
 }

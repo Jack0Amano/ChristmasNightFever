@@ -73,20 +73,20 @@ namespace Units.TPS
         {
             get
             {
-                _cinemachineVirtualCameras ??= new List<CinemachineVirtualCamera>()
+                cinemachineVirtualCameras ??= new List<CinemachineVirtualCamera>()
                 {
                     //aimCamera, 
                     followCamera, 
                     //OverShoulderCamera, 
                     //OverShoulderCameraFar,
                 };
-                return _cinemachineVirtualCameras;
+                return cinemachineVirtualCameras;
             }
         }
-        private List<CinemachineVirtualCamera> _cinemachineVirtualCameras;
+        private List<CinemachineVirtualCamera> cinemachineVirtualCameras;
 
         /// <summary>
-        /// Animationの再生と停止
+        /// Animationの再生と停止 TPSCharaに関してはanimation.speedを0にして対応 AutoMoveなど自動移動は関数内部でPaus中yield return nullで回して対応
         /// </summary>
         public bool PauseAnimation
         {
@@ -128,7 +128,7 @@ namespace Units.TPS
         /// </summary>
         internal bool IsCrouching 
         {
-            get => m_Character.m_Crouching;
+            get => m_Character.Crouching;
         }
 
         public UnitController UnitController
@@ -259,7 +259,7 @@ namespace Units.TPS
         /// </summary>
         internal void SwitchCrouching()
         {
-            StartCoroutine( m_Character.Crouch(!m_Character.m_Crouching) );
+            StartCoroutine( m_Character.Crouch(!m_Character.Crouching) );
         }
         #endregion
 
@@ -482,7 +482,7 @@ namespace Units.TPS
         }
 
         /// <summary>
-        /// Characterを回転移動させTargetポジションに向ける
+        /// Characterを回転移動させTargetポジションに向ける pause中のcorutineは終了しない
         /// </summary>
         /// <param name="rotation"></param>
         public IEnumerator RotateTo(Vector3 target, bool fastRotation = false)
@@ -490,6 +490,7 @@ namespace Units.TPS
             // TODO 回転速度の上昇を行う
             IsAutoMoving = true;
             IsMoving = true;
+            var startTime = DateTime.Now;
             while (IsAutoMoving)
             {
                 Vector3 worldDeltaPosition = target - transform.position;
@@ -504,10 +505,17 @@ namespace Units.TPS
                 if (Math.Abs(smoothDeltaPosition.x) < 0.05)
                     break;
 
-                print(smoothDeltaPosition);
-
                 yield return null;
                 m_Character.Rotate(smoothDeltaPosition.x);
+
+                // 一時停止に対応
+                if (PauseAnimation)
+                {
+                    var startPause = DateTime.Now;
+                    while (PauseAnimation)
+                        yield return null;
+                    startTime.Add(DateTime.Now - startPause);
+                }
             }
             IsAutoMoving = false;
             IsMoving = false;

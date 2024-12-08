@@ -43,7 +43,17 @@ namespace Units
         // Update is called once per frame
         void Update()
         {
-
+            if (UserController.KeyCodeEscape)
+            {
+                if (EnemyUnitControllers[0].EnemyAI.IsPause)
+                {
+                    EnemyUnitControllers.ForEach(enemy => enemy.EnemyAI.UnpauseAI());
+                }
+                else
+                {
+                    EnemyUnitControllers.ForEach(enemy => enemy.EnemyAI.PauseAI());
+                }
+            }
         }
 
 
@@ -136,12 +146,11 @@ namespace Units
 
                yield return new WaitForSeconds(0.5f);
                 // CameraUserControllerにPlayerのTPSConを渡して、これにカメラをFollowさせる
-                PlayerUnitController.TPSController.followCamera.Priority = 1;
                 PlayerUnitController.TPSController.IsTPSControllActive = true;
-                StartCoroutine(cameraUserController.ChangeModeFollowTarget(PlayerUnitController.TPSController));
+                StartCoroutine(cameraUserController.SetAsFollowTarget(PlayerUnitController.TPSController));
 
-                PlayerUnitController.StartToGame();
-                EnemyUnitControllers.ForEach(enemy => enemy.StartToGame());
+                PlayerUnitController.StartGame();
+                EnemyUnitControllers.ForEach(enemy => enemy.StartGame());
             }
             StartCoroutine(_OnDelayActions());
 
@@ -165,7 +174,16 @@ namespace Units
             EnemyUnitControllers.Clear();
         }
 
+        /// <summary>
+        /// すべてのUnitの行動を一時停止する
+        /// </summary>
+        public void PauseAllUnits()
+        {
+            PlayerUnitController.PauseGame();
+            EnemyUnitControllers.ForEach(enemy => enemy.PauseGame());
+        }
 
+        #region Actions
         /// <summary>
         /// キャラクタ-もしくはStageControllerObject送られてくるUnitActionEventArgsを受け取り、判断し、Unitに反映させる
         /// </summary>
@@ -231,6 +249,7 @@ namespace Units
                 RemoveAllUnits();
             }
         }
+        #endregion
 
     }
 }

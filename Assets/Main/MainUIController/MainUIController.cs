@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using Cinemachine;
 using StageObjects;
+using Units;
 
 // StageIDがInspector上で設定されており、難易度などがあればそれらのデータと紐づけるためのデータの参照元が必要
 
@@ -28,6 +29,8 @@ namespace MainUI
         [SerializeField] CinemachineVirtualCamera messageVirtualCamera;
         [Tooltip("Lose画面の際にを表示するバーチャルカメラ")]
         [SerializeField] CinemachineVirtualCamera loseResultVirtualCamera;
+
+        [SerializeField] CameraUserController cameraUserController;
 
         GameManager gameManager;
 
@@ -75,7 +78,7 @@ namespace MainUI
             startPanel.ShowPanel();
             loadingPanel.HidePanel(false);
             resultPanel.HidePanel();
-            messageVirtualCamera.Priority = 10;
+            cameraUserController.SetFreeCameraMode(messageVirtualCamera);
         }
 
         /// <summary>
@@ -89,7 +92,6 @@ namespace MainUI
             yield return new WaitForSeconds(duration);
             startPanel.HidePanel();
             resultPanel.HidePanel();
-            loseResultVirtualCamera.Priority = -1;
         }
 
         /// <summary>
@@ -120,11 +122,11 @@ namespace MainUI
 
             if (doesWin)
             {
-                messageVirtualCamera.Priority = 10;
+                cameraUserController.SetFreeCameraMode(messageVirtualCamera);
             }
             else
             {
-                loseResultVirtualCamera.Priority = 10;
+                cameraUserController.SetFreeCameraMode(loseResultVirtualCamera);
             }
         
         }
@@ -138,7 +140,6 @@ namespace MainUI
             {
                 yield return new WaitForSeconds(1f);
                 UserController.enableCursor = false;
-                messageVirtualCamera.Priority = -1;
             }
 
             StartCoroutine(Show());
