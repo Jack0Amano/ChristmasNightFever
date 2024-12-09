@@ -191,9 +191,12 @@ namespace Units
         {
             //if (gameManager != null && (gameManager.StartCanvasController.IsEnable))
             //    return;
+            if (!enableCameraControlling)
+                return;
+
             if (Mode == CameraMode.Follow)
             {
-                if (TargetToFollow == null || IsOnAnimation || !enableCameraControlling)
+                if (TargetToFollow == null || IsOnAnimation)
                     return;
                 FollowCameraUpdate(FollowObject, TargetToFollow);
                 if (UserController.ChangeFollowCameraPositionRightOrLeft)

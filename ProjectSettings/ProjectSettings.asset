@@ -136,7 +136,7 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-  bundleVersion: 1.0.3
+  bundleVersion: alpha-1.0.3
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -813,7 +813,7 @@ PlayerSettings:
     PS5: DOTWEEN;UNITY_POST_PROCESSING_STACK_V2
     QNX: DOTWEEN;UNITY_POST_PROCESSING_STACK_V2
     Stadia: DOTWEEN;UNITY_POST_PROCESSING_STACK_V2
-    Standalone: AMPLIFY_SHADER_EDITOR;DOTWEEN;UNITY_POST_PROCESSING_STACK_V2
+    Standalone: AMPLIFY_SHADER_EDITOR;DOTWEEN;UNITY_POST_PROCESSING_STACK_V2;BAKERY_INCLUDED;BAKERY_NOREIMPORT
     VisionOS: DOTWEEN;UNITY_POST_PROCESSING_STACK_V2
     WebGL: DOTWEEN;UNITY_POST_PROCESSING_STACK_V2
     Windows Store Apps: DOTWEEN

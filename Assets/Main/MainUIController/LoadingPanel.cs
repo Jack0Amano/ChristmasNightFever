@@ -13,6 +13,8 @@ namespace MainUI
         // パネルの透明度を変更するためのコンポーネント
         private CanvasGroup canvasGroup;
 
+        public bool IsActive => gameObject.activeSelf;
+
         private void Awake()
         {
             canvasGroup = GetComponent<CanvasGroup>();
@@ -34,6 +36,10 @@ namespace MainUI
         /// </summary>
         internal void ShowPanel(float duration)
         {
+            if (canvasGroup.alpha != 0)
+            {
+                return;
+            }
             canvasGroup.alpha = 0;
             gameObject.SetActive(true);
             canvasGroup.DOFade(1, duration);
@@ -50,6 +56,7 @@ namespace MainUI
             }
             else
             {
+                canvasGroup.alpha = 0;
                 gameObject.SetActive(false);
             }
         }

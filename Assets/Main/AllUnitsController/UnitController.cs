@@ -49,7 +49,10 @@ namespace Units
         public EnemyAI EnemyAI { private set; get; }
 
         private AudioSource audioSource;
-
+        /// <summary>
+        /// ˆê’â~’†‚Å‚ ‚é‚©
+        /// </summary>
+        public bool IsPaused { get; private set; } = false;
 
         private void Awake()
         {
@@ -94,24 +97,36 @@ namespace Units
         /// <summary>
         /// Unit‚Ì‘€ì‹y‚Ñs“®‚ğˆê’â~‚·‚é
         /// </summary>
-        internal void PauseGame()
+        internal void PauseUnit()
         {
             if (unitType == UnitType.Player)
             {
                 TPSController.IsTPSControllActive = false;
+                TPSController.PauseAnimation = true;
+                
             }
             else
             {
-                EnemyAI?.StopAI();
+                EnemyAI?.PauseAI();
             }
+            IsPaused = true;
         }
 
         /// <summary>
-        /// 
+        /// ƒQ[ƒ€‚Ìƒ|[ƒYó‘Ô‚ğ‰ğœ‚·‚é
         /// </summary>
-        internal void UnpauseGame()
+        internal void UnpauseUnit()
         {
-
+            if (unitType == UnitType.Player)
+            {
+                TPSController.IsTPSControllActive = true;
+                TPSController.PauseAnimation = false;
+            }
+            else
+            {
+                EnemyAI?.UnpauseAI();
+            }
+            IsPaused = false;
         }
 
         /// <summary>

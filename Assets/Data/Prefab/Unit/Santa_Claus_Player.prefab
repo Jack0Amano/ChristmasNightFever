@@ -1165,7 +1165,7 @@ MonoBehaviour:
   m_GroundCheckDistance: 0.1
   aimSensitivity: 3
   WalkSpeed: 0.5
-  DashSpeed: 1.8
+  DashSpeed: 1.7
   FollowingWallMaxDegree: 165
   FollowingWallMinDegree: 35
   MoveFollowingWallAnimationCurve:

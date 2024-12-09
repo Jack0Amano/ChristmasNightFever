@@ -34,6 +34,10 @@ namespace MainUI
 
         GameManager gameManager;
 
+        private void Awake()
+        {
+            loseResultVirtualCamera.Priority = 0;
+        }
 
         // Start is called before the first frame update
         void Start()
@@ -60,9 +64,13 @@ namespace MainUI
         /// </summary>
         private void LoadStage(string stageID)
         {
-           
             // GameManagerにシーンのロードを依頼 IDはAddressableのラベル名と対応
-            gameManager.LoadStage(stageID);
+            IEnumerator LoadStageDelay()
+            {
+                yield return new WaitForSeconds(0.5f);
+                gameManager.LoadStage(stageID);
+            }
+            StartCoroutine(LoadStageDelay());
             StartCoroutine(ShowLoadingAtLoadGame());
         }
 
@@ -87,9 +95,11 @@ namespace MainUI
         /// </summary>
         internal IEnumerator ShowLoadingAtLoadGame()
         {
-            const float duration = 0.5f;
-            loadingPanel.ShowPanel(duration);
-            yield return new WaitForSeconds(duration);
+            loadingPanel.ShowPanel(1f);
+            while(gameManager.StageObjectsController == null)
+            {
+                yield return null;
+            }
             startPanel.HidePanel();
             resultPanel.HidePanel();
         }
@@ -100,8 +110,16 @@ namespace MainUI
         /// <returns></returns>
         internal void ShowMessagesPanel()
         {
-            loadingPanel.HidePanel(true);
-            messagePanel.ShowPanel();
+            if (messagePanel.DoesMessageExist)
+            {
+                messagePanel.ShowPanel();
+                loadingPanel.HidePanel(true);
+            }
+            else
+            {
+                gameManager.OnMessagePanelClosed();
+            }
+            
         }
 
         /// <summary>
@@ -136,13 +154,14 @@ namespace MainUI
         /// </summary>
         public void OnMessagePanelClosed()
         {
-            IEnumerator Show()
+            static IEnumerator Show()
             {
                 yield return new WaitForSeconds(1f);
                 UserController.enableCursor = false;
             }
 
             StartCoroutine(Show());
+
             StartCoroutine( loadingPanel.ShowPanelForSeconds(1.5f));
         }
     }

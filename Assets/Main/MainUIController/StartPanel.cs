@@ -6,6 +6,7 @@ using System;
 using UnityEngine.UI;
 using System.Linq;
 using static Utility;
+using TMPro;
 
 namespace MainUI
 {
@@ -20,11 +21,15 @@ namespace MainUI
         [Tooltip("ゲームを終了するボタン")]
         [SerializeField] private Button exitButton;
 
+        [SerializeField] private TextMeshProUGUI versionLabel;
+
         CanvasGroup canvasGroup;
 
 
         private void Awake()
         {
+            versionLabel.text = $"Version {Application.version}";
+
             exitButton.onClick.AddListener(() =>
             {
                 GameManager.Instance.EndGame();

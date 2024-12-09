@@ -28,6 +28,16 @@ namespace MainUI
         // 最後に表示したメッセージの時間
         private float lastMessageTime;
 
+        /// <summary>
+        /// 表示するメッセージがあるかどうか
+        /// </summary>
+        public bool DoesMessageExist
+        {
+            get => messageContainerList != null && 
+                   messageContainerList.Count != 0 && 
+                   messageIndex < messageContainerList[0].messages.Count;
+        }
+
         // Start is called before the first frame update
         void Start()
         {

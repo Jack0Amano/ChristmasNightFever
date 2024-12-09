@@ -43,7 +43,10 @@ namespace Units
         // Update is called once per frame
         void Update()
         {
-            if (UserController.KeyCodeEscape)
+
+#if UNITY_EDITOR
+            // Debug—p‚ÉEnemy‚ÌAI‚ğˆê’â~‚³‚¹‚é
+            if (UserController.DebugKeyDown)
             {
                 if (EnemyUnitControllers[0].EnemyAI.IsPause)
                 {
@@ -54,6 +57,7 @@ namespace Units
                     EnemyUnitControllers.ForEach(enemy => enemy.EnemyAI.PauseAI());
                 }
             }
+#endif
         }
 
 
@@ -179,8 +183,31 @@ namespace Units
         /// </summary>
         public void PauseAllUnits()
         {
-            PlayerUnitController.PauseGame();
-            EnemyUnitControllers.ForEach(enemy => enemy.PauseGame());
+            if (PlayerUnitController.IsPaused)
+            {
+                PrintWarning("All units are already paused.");
+                return;
+            }
+
+            PlayerUnitController.PauseUnit();
+            EnemyUnitControllers.ForEach(enemy => enemy.PauseUnit());
+            cameraUserController.enableCameraControlling = false;
+        }
+
+        /// <summary>
+        /// ‚·‚×‚Ä‚ÌUnit‚Ìs“®‚ğÄŠJ‚·‚é
+        /// </summary>
+        public void UnpauseAllUnits()
+        {
+            if (!PlayerUnitController.IsPaused)
+            {
+                PrintWarning("All units are already unpaused.");
+                return;
+            }
+
+            PlayerUnitController.UnpauseUnit();
+            EnemyUnitControllers.ForEach(enemy => enemy.UnpauseUnit());
+            cameraUserController.enableCameraControlling = true;
         }
 
         #region Actions

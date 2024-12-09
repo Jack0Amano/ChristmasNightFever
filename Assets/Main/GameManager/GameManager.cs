@@ -12,7 +12,7 @@ using UnityEngine.AzureSky;
 
 
 // 開発速度を一番に考えてそれ以外は軽視したためシングルトンに頼り切った流れができている
-// 別に進行状況を管理するクラスを作ってそこに処理を移す
+// 別に進行状況を管理するクラスを作ってそこに処理を移す GameStreamクラスを作成して各上流Controllerがそれを参照するようにする
 
 public class GameManager : MonoBehaviour
 {
@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     public GameState CurrentGameState { get; private set; }
 
     public static GameManager Instance { get; private set; }
+
+    public StageObjectsController StageObjectsController { get; private set; }
 
     private void Awake()
     {
@@ -56,6 +58,11 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private void FixedUpdate()
+    {
+        UserControl();
     }
 
     #region Game Stream
@@ -84,8 +91,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void OnStageLoaded()
     {
-        var stageObjectController = stageObjectControllerObj.Result.GetComponent<StageObjectsController>();
-        allUnitsController.OnStageLoaded(stageObjectController);
+        StageObjectsController = stageObjectControllerObj.Result.GetComponent<StageObjectsController>();
+        allUnitsController.OnStageLoaded(StageObjectsController);
     }
 
     /// <summary>
@@ -127,7 +134,11 @@ public class GameManager : MonoBehaviour
         CurrentStageId = "";
         // stageObjectControllerの破棄
         if (stageObjectControllerObj.IsValid())
+        {
             Addressables.ReleaseInstance(stageObjectControllerObj);
+            StageObjectsController = null;
+        }
+            
     }
 
     /// <summary>
@@ -145,6 +156,25 @@ public class GameManager : MonoBehaviour
 #endif
     }
     #endregion
+
+    /// <summary>
+    /// ユーザーの様々な入力を受け付ける
+    /// </summary>
+    private void UserControl()
+    {
+        //if (UserController.KeyCodeEscape)
+        //{
+        //    if (CurrentGameState == GameState.Playing)
+        //    {
+        //        mainUIController.ShowStartPanelAtAwake();
+        //        CurrentGameState = GameState.Title;
+        //    }
+        //    else if (CurrentGameState == GameState.Title)
+        //    {
+        //        EndGame();
+        //    }
+        //}
+    }
 
 }
 
