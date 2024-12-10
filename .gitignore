@@ -18,6 +18,10 @@ Assets/Plugins/
 Assets/AmplifyAnimationPack
 Assets/FlatKit
 OriginalObject/
+Assets/AmplifyImpostors
+Assets/MobilePostProcess
+Assets/SimpleFX
+Assets/Packages
 
 # Visual Studio cache directory
 .vs/
