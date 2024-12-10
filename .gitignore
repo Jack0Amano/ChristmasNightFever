@@ -63,3 +63,7 @@ sysinfo.txt
 *.mp3
 *.wav
 .DS_Store
+
+# 例外処理
+!Document/*.png
+!Document/*.jpg
