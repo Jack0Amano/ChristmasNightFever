@@ -23,9 +23,6 @@ namespace StageObjects
         [Tooltip("勝利時にユーザーの方に向けて撮られるバーチャルカメラ")]
         [SerializeField] public CinemachineVirtualCamera winVirtualCamera;
 
-        [Tooltip("負けた際にのResult画面に使われるバーチャルカメラ")]
-        [SerializeField] public CinemachineVirtualCamera loseVirtualCamera;
-
         /// <summary>
         /// Unitがゴールに到達したときにAllUnitsControllerに通知するイベント
         /// </summary>

@@ -495,7 +495,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4274312888061460}
   - component: {fileID: 137548302258460052}
-  - component: {fileID: 143801234320180764}
   m_Layer: 0
   m_Name: Santa_Claus_LW
   m_TagString: Untagged
@@ -602,35 +601,9 @@ SkinnedMeshRenderer:
   m_BlendShapeWeights: []
   m_RootBone: {fileID: 4172294052423536}
   m_AABB:
-    m_Center: {x: 0.0018684268, y: 0.0871312, z: -0.008700132}
-    m_Extent: {x: 1.7158077, y: 1.4357467, z: 0.5774402}
+    m_Center: {x: 0.0018684864, y: 0.03960204, z: -0.008700132}
+    m_Extent: {x: 1.7158077, y: 1.3882174, z: 0.5774402}
   m_DirtyAABB: 0
---- !u!143 &143801234320180764
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1461737909049774}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Height: 2.81
-  m_Radius: 0.74
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1.22, z: 0}
 --- !u!1 &1472195503744816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1140,9 +1113,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.71765846
-  m_Height: 2.695622
+  m_Height: 2.6423051
   m_Direction: 1
-  m_Center: {x: 0.024604904, y: 1.3439087, z: 0}
+  m_Center: {x: 0.024604904, y: 1.3705664, z: 0}
 --- !u!114 &812600910871114047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1988,14 +1961,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5555133322059274592}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.19858733, y: -0.000000029802322, z: -0.0018687618, w: 0.9800815}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.12993595, y: -0.00013001308, z: -0.0018642351, w: 0.99152064}
+  m_LocalPosition: {x: 0, y: 0, z: 0.00000047683716}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1602970576390797752}
   m_Father: {fileID: 3321495899548159886}
-  m_LocalEulerAnglesHint: {x: 22.909, y: -0.046, z: -0.228}
+  m_LocalEulerAnglesHint: {x: 14.932, y: -0.044, z: -0.221}
 --- !u!114 &2733039630997681300
 MonoBehaviour:
   m_ObjectHideFlags: 0

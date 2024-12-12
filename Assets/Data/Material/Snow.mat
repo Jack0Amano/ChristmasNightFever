@@ -107,7 +107,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _Emission: 223.2
+    - _Emission: 0.2
     - _EnvironmentReflections: 1
     - _Float0: 0.17
     - _Float2: 1

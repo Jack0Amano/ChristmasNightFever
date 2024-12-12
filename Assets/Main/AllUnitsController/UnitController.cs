@@ -75,15 +75,15 @@ namespace Units
                 StartCoroutine(cameraUserController.SetAsFollowTarget(TPSController));
             }
 
-            var animator = GetComponent<Animator>();
-            if (unitType == UnitType.Player)
-            {
-                animator.SetBool("AlongWall", true);
-            }
-            else
-            {
-                animator.SetBool("AlongWall", false);
-            }
+            //var animator = GetComponent<Animator>();
+            //if (unitType == UnitType.Player)
+            //{
+            //    animator.SetBool("AlongWall", true);
+            //}
+            //else
+            //{
+            //    animator.SetBool("AlongWall", false);
+            //}
         }
 
         // Update is called once per frame

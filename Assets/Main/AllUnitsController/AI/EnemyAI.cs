@@ -80,7 +80,7 @@ namespace Units.AI
         /// 途中でポーズやcancelが行えるwaitforsecondsStoppableに値渡しするためのトリガー
         /// 注意点として別メソッドが不用意にcancelすると現在waitforsecondsStoppableが動いているコルーチンもキャンセルされる
         /// </summary>
-        private WaitForSecondsStopableTrigger waitForSecondsTrigger;
+        private WaitForSecondsStopableTrigger waitForSecondsTrigger = new WaitForSecondsStopableTrigger();
         /// <summary>
         /// AIがポーズ中であるか
         /// </summary>
@@ -104,9 +104,8 @@ namespace Units.AI
         // Start is called before the first frame update
         void Start()
         {
-            headUP.SetFindOutLevel(0.7f);
+            //headUP.SetFindOutLevel(0.7f);
             navMeshAgent = GetComponent<NavMeshAgent>();
-            waitForSecondsTrigger = new WaitForSecondsStopableTrigger();
         }
 
         // Update is called once per frame
@@ -116,6 +115,9 @@ namespace Units.AI
 
         private void FixedUpdate()
         {
+            if (GameManager.Instance.CurrentGameState != GameState.Playing)
+                return;
+
             if (moveState == EnemyAIMoveState.Finish || IsPause)
                 return;
 
