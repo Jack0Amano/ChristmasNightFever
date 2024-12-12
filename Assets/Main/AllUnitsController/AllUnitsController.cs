@@ -69,7 +69,7 @@ namespace Units
         {
             stageObjectsController.OnGoalReached += (sender, e) => StartCoroutine(OnGoalReached(sender, e));
 
-            IEnumerator _SpawnUnit(StageObjectsController stageObjectsController)
+            IEnumerator SpawnUnit(StageObjectsController stageObjectsController)
             {
                 this.stageObjectsController = stageObjectsController;
                 // Enemy UnitÇÃê›íuÇStageObjectControllerÇÃEditWay index=0Ç©ÇÁéÊìæ
@@ -77,9 +77,9 @@ namespace Units
                 var spawnCorutines = stageObjectsController.EnemyWays.ConvertAll(way =>
                 {
                     var enemyID = enemyUnitIDList[Random.Range(0, enemyUnitIDList.Count)];
-                    return StartCoroutine(SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointsParent.name, way.pointAndStops));
+                    return StartCoroutine(this.SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointsParent.name, way.pointAndStops));
                 });
-                spawnCorutines.Add(StartCoroutine(SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player, "Player")));
+                spawnCorutines.Add(StartCoroutine(this.SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player, "Player")));
 
                 // Ç∑Ç◊ÇƒÇÃUnitÇÃê›íuÇ™èIÇÌÇÈÇ‹Ç≈ë“Ç¬
                 foreach (var corutine in spawnCorutines)
@@ -95,7 +95,7 @@ namespace Units
 
                 OnUnitsLoaded();
             }
-            StartCoroutine(_SpawnUnit(stageObjectsController));
+            StartCoroutine(SpawnUnit(stageObjectsController));
         }
 
         /// <summary>

@@ -156,9 +156,7 @@ namespace Units.Icon
                             isFadeAnimating = false;
                             Type = HeadUpIconType.None;
                         });
-
                     }
-
                 });
                 seq.Play();
             }

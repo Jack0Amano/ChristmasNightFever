@@ -74,6 +74,16 @@ namespace Units
                 print(TPSController);
                 StartCoroutine(cameraUserController.SetAsFollowTarget(TPSController));
             }
+
+            var animator = GetComponent<Animator>();
+            if (unitType == UnitType.Player)
+            {
+                animator.SetBool("AlongWall", true);
+            }
+            else
+            {
+                animator.SetBool("AlongWall", false);
+            }
         }
 
         // Update is called once per frame
@@ -187,13 +197,10 @@ namespace Units
         internal IEnumerator Killed()
         {
             TPSController.IsTPSControllActive = false;
-
             // ここで倒れるなどのアニメーションを再生する
             // カメラも倒れた者を撮る感じのアニメーションに変更
             StartCoroutine(TPSController.Killed());
-
             yield return new WaitForSeconds(4.0f);
-
             OnUnitAction?.Invoke(this, new UnitActionEventArgs(this, UnitAction.Die));
         }
 
@@ -203,7 +210,7 @@ namespace Units
         internal void FoundYou(UnitController sender)
         {
 
-            IEnumerator _WinVoice()
+            IEnumerator DelayWinVoice()
             {
                 yield return new WaitForSeconds(1.5f);
                 SEController.EnemyWinVoiceSE();
@@ -217,7 +224,7 @@ namespace Units
             else
             {
                 EnemyAI?.StopAI();
-                StartCoroutine(_WinVoice());
+                StartCoroutine(DelayWinVoice());
             }
         }
         #endregion

@@ -104,6 +104,7 @@ namespace Units.AI
         // Start is called before the first frame update
         void Start()
         {
+            headUP.SetFindOutLevel(0.7f);
             navMeshAgent = GetComponent<NavMeshAgent>();
             waitForSecondsTrigger = new WaitForSecondsStopableTrigger();
         }

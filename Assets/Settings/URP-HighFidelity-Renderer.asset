@@ -1,5 +1,51 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8272565737827022038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 864677e595539bf4bbecf0c40589f800, type: 3}
+  m_Name: PostProcessUrp
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    Event: 450
+    blitMaterial: {fileID: 2100000, guid: 0d439bd919acb754099435230811f0fe, type: 2}
+    Blur: 0
+    BlurAmount: 1
+    BlurMask: {fileID: 0}
+    Bloom: 0
+    BloomColor: {r: 1, g: 1, b: 1, a: 1}
+    BloomAmount: 1
+    BloomDiffuse: 1
+    BloomThreshold: 0
+    BloomSoftness: 0
+    LUT: 0
+    LutAmount: 0
+    SourceLut: {fileID: 2800000, guid: 721017178fc4f324aae148977215c5ae, type: 3}
+    ImageFiltering: 0
+    Color: {r: 1, g: 1, b: 1, a: 1}
+    Contrast: 0
+    Brightness: 0
+    Saturation: 0
+    Exposure: 0
+    Gamma: 0
+    Sharpness: 0
+    ChromaticAberration: 0
+    Offset: 0
+    FishEyeDistortion: 0
+    GlitchAmount: 0
+    Distortion: 0
+    LensDistortion: 0
+    Vignette: 0
+    VignetteColor: {r: 0, g: 0, b: 0, a: 1}
+    VignetteAmount: 0
+    VignetteSoftness: 0.001
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12,7 +58,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f62c9c65cf3354c93be831c8bc075510, type: 3}
   m_Name: SSAO
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   m_Settings:
     AOMethod: 1
     Downsample: 0
@@ -54,7 +100,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
   - {fileID: 1372529245515393589}
-  m_RendererFeatureMap: adc0de57c6d2eee535aac7aa13340c13
+  - {fileID: -8272565737827022038}
+  m_RendererFeatureMap: adc0de57c6d2eee535aac7aa13340c132acbc0974af1318d
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -109,7 +156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f44c99f39cf5a4e9cd4cd047b1e2b2, type: 3}
   m_Name: AzureFogScatteringFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   m_renderPassEvent: 350
   m_fogRendererMaterial: {fileID: 2100000, guid: 7c44f023cdb4c0143a67ffa79e3be149,
     type: 2}

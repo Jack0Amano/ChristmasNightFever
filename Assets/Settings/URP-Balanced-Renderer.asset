@@ -20,6 +20,52 @@ MonoBehaviour:
     type: 2}
   m_fogRenderTextureWidth: 1920
   m_fogRenderTextureHeight: 1080
+--- !u!114 &-3424716874438539346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 864677e595539bf4bbecf0c40589f800, type: 3}
+  m_Name: PostProcessUrp
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    Event: 450
+    blitMaterial: {fileID: 2100000, guid: 0d439bd919acb754099435230811f0fe, type: 2}
+    Blur: 0
+    BlurAmount: 1
+    BlurMask: {fileID: 0}
+    Bloom: 0
+    BloomColor: {r: 1, g: 1, b: 1, a: 1}
+    BloomAmount: 1
+    BloomDiffuse: 1
+    BloomThreshold: 0
+    BloomSoftness: 0
+    LUT: 0
+    LutAmount: 0
+    SourceLut: {fileID: 2800000, guid: 721017178fc4f324aae148977215c5ae, type: 3}
+    ImageFiltering: 0
+    Color: {r: 1, g: 1, b: 1, a: 1}
+    Contrast: 0
+    Brightness: 0
+    Saturation: 0
+    Exposure: 0
+    Gamma: 0
+    Sharpness: 0
+    ChromaticAberration: 0
+    Offset: 0
+    FishEyeDistortion: 0
+    GlitchAmount: 0
+    Distortion: 0
+    LensDistortion: 0
+    Vignette: 0
+    VignetteColor: {r: 0, g: 0, b: 0, a: 1}
+    VignetteAmount: 0
+    VignetteSoftness: 0.001
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,7 +120,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
   - {fileID: -4634618421372189022}
-  m_RendererFeatureMap: adc0de57c6d2eee5a206a1dc1987aebf
+  - {fileID: -3424716874438539346}
+  m_RendererFeatureMap: adc0de57c6d2eee5a206a1dc1987aebfae07ceca25f678d0
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

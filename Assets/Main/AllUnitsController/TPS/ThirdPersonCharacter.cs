@@ -188,8 +188,6 @@ namespace Units.TPS
             rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             origGroundCheckDistance = m_GroundCheckDistance;
 
-            collisionObjectLayer = 1 << LayerMask.NameToLayer("Object");
-
             //BodyTrigger.EnterAlongWallActionHandler = EnterAlongWallCallback;
             //BodyTrigger.StayAlongWallActionHandler = StayAlonwWallCallback;
             //BodyTrigger.ExitAlongWallActionHandler = ExitAlongWallCallback;
@@ -694,96 +692,6 @@ namespace Units.TPS
         }
 
 
-        #region Deprecated
-        private void OnCollisionEnterTrigger(Collider collider)
-        {
-            if (((1 << collider.gameObject.layer) & collisionObjectLayer) != 0)
-            {
-                UnitHitsWall = true;
-            }
-        }
-
-        private void OnTriggerStayTrigger(GameObject other, Vector3 hitPosition)
-        {
-
-        }
-
-        private void OnCollisionStay_(Collision collision)
-        {
-            if (((1 << collision.gameObject.layer) & collisionObjectLayer) != 0)
-            {
-                // もしAddVelocity!=.zeroでdotProduct~=-1.0の場合壁に向かって走っている
-                UnitHitsWall = true;
-
-                // 衝突した面の、接触した点における法線ベクトルを取得
-                var contactNormal = collision.contacts[0].normal;
-
-                var dotProduct = Vector3.Dot(contactNormal, addVelocity.normalized);
-                var angle = Vector3.Angle(contactNormal, Vector3.up);
-
-                if (TAKE_COVER_MIN_ANGLE < angle && angle < TAKE_COVER_MAX_ANGLE)
-                {
-                    if (unitHitsWallFrameCount == Time.frameCount)
-                    {
-                        // 2つ以上のカバー可能な壁に張り付いている状態
-                        if (isCovering)
-                        {
-                            // 現在カバー中
-                        }
-                        else
-                        {
-                            // カバーに入っていない
-                            // 2つのカバー可能な壁に同時に接触した
-                            if (dotProduct < wallDotProduct)
-                            {
-                                // この呼び出しで呼び出されたconverのほうが垂直に接触している
-                                takeCoverNormal = contactNormal;
-                                wallDotProduct = dotProduct;
-                                isCovering = true;
-                                AlongWallObject = collision.gameObject;
-
-                                print($"Start covering more: {collision.gameObject}");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // 1つのカバー可能な壁に張り付いている状態
-                        if (isCovering)
-                        {
-                            // 現在カバー中
-                        }
-                        else
-                        {
-                            // カバーに入っていない
-                            takeCoverNormal = contactNormal;
-                            wallDotProduct = dotProduct;
-                            isCovering = true;
-                            AlongWallObject = collision.gameObject;
-                            print($"Start covering 1: {collision.gameObject}");
-                        }
-                    }
-                }
-                else
-                {
-                    // カバー不能な角度の壁についている
-                }
-
-                unitHitsWallFrameCount = Time.frameCount;
-            }
-        }
-
-        private void OnCollisionExitTrigger(Collider collider)
-        {
-            if (((1 << collider.gameObject.layer) & collisionObjectLayer) != 0)
-            {
-                UnitHitsWall = false;
-                isCovering = false;
-                print("End covering");
-            }
-        }
-        #endregion
-
         #region Motions
         // 各種細々としたモーション
 
@@ -819,7 +727,6 @@ namespace Units.TPS
         /// </summary>
         internal IEnumerator Killed()
         {
-            const float duration = 0.3f;
             animator.SetLayerWeight(BASE_LAYER, 0);
             animator.SetLayerWeight(UPPER_LAYER, 0);
             animator.SetLayerWeight(UPPER_LAYER_WITH_MASK, 0);

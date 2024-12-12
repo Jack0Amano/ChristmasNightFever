@@ -12,7 +12,7 @@ using Units.TPS;
 namespace Units
 {
     /// <summary>
-    /// 足音を管理してaudiosourceを使って再生する
+    /// Unitから出る音全般を管理する
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     [RequireComponent(typeof(ThirdPersonUserControl))]
@@ -46,7 +46,7 @@ namespace Units
 
 
         /// <summary>
-        /// Deathアニメーションの際に呼び出される声のタイミング
+        /// Playerが発見時に出す声がでるアニメーションのタイミングで呼び出される
         /// </summary>
         public void PlayDeathVoiceSE()
         {
@@ -54,7 +54,7 @@ namespace Units
         }
 
         /// <summary>
-        /// ベルを鳴らすアニメーションの際に呼び出されるベルのタイミング
+        /// ベルを鳴らすアニメーションで音が出るタイミングで呼び出される
         /// </summary>
         public void PlayerBellSE()
         {
@@ -62,7 +62,7 @@ namespace Units
         }
 
         /// <summary>
-        /// Enemyが発見した際に呼び出される声のタイミング
+        /// 敵が発見時に発見者以外の敵が上げる歓声
         /// </summary>
         public void EnemyWinVoiceSE()
         {
@@ -70,7 +70,7 @@ namespace Units
         }
 
         /// <summary>
-        /// 笛を鳴らすアニメーションの際に呼び出される声のタイミング
+        /// 敵が発見時にUnitControllerから呼び出される
         /// </summary>
         public void EnemyrWhistleSE()
         {
@@ -78,7 +78,7 @@ namespace Units
         }
 
         /// <summary>
-        /// 走りのアニメーションの際に呼び出される足音のタイミング
+        /// 走りのアニメーションの際に足音の出るであろうアニメーションタイミングで呼び出される
         /// </summary>
         public void PlayRunFootstepSE()
         {
@@ -95,7 +95,7 @@ namespace Units
         }
 
         /// <summary>
-        /// 歩きのアニメーションの際に呼び出される足音のタイミング
+        /// 歩きのアニメーションの際に足音の出るであろうアニメーションタイミングで呼び出される
         /// </summary>
         public void PlayWalkFootstepSE()
         {
