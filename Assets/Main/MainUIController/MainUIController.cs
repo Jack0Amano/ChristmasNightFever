@@ -5,6 +5,7 @@ using System.Linq;
 using Cinemachine;
 using StageObjects;
 using Units;
+using System;
 
 // StageIDがInspector上で設定されており、難易度などがあればそれらのデータと紐づけるためのデータの参照元が必要
 
@@ -32,7 +33,17 @@ namespace MainUI
 
         [SerializeField] CameraUserController cameraUserController;
 
-        GameManager gameManager;
+        /// <summary>
+        /// UIパネルが閉じられた際の通知をGameStreamerに送るためのイベント
+        /// </summary>
+        public EventHandler<OnUIPanelClosedEventArgs> onUIPanelClosedHandler;
+
+
+        /// <summary>
+        /// GameStreamerにシーンのロードを依頼するためのイベント
+        /// Eventの関数の設定はGameStreamerのSetEventsで行う
+        /// </summary>
+        public EventHandler<RequestLoadStageEventArgs> requestLoadStageHandler;
 
         private void Awake()
         {
@@ -42,14 +53,18 @@ namespace MainUI
         // Start is called before the first frame update
         void Start()
         {
-            gameManager = GameManager.Instance;
             startPanel.stageButtons.ForEach(b =>
             {
                 b.button.onClick.AddListener(() =>
                 {
-                    LoadStage(b.stageID);
+                    StartCoroutine(LoadStage(b.stageID));
                 });
             });
+        }
+
+        private void OnDestroy()
+        {
+            requestLoadStageHandler = null;
         }
 
         // Update is called once per frame
@@ -62,16 +77,13 @@ namespace MainUI
         /// シーンIDを受取、GameManagerにシーンのロードを依頼する   
         /// また、ロード中のパネルを表示する
         /// </summary>
-        private void LoadStage(string stageID)
+        private IEnumerator LoadStage(string stageID)
         {
-            // GameManagerにシーンのロードを依頼 IDはAddressableのラベル名と対応
-            IEnumerator LoadStageDelay()
-            {
-                yield return new WaitForSeconds(0.5f);
-                gameManager.LoadStage(stageID);
-            }
-            StartCoroutine(LoadStageDelay());
-            StartCoroutine(ShowLoadingAtLoadGame());
+            loadingPanel.ShowPanel(0.5f);
+            yield return new WaitForSeconds(0.5f);
+            requestLoadStageHandler?.Invoke(this, new RequestLoadStageEventArgs(stageID));
+            startPanel.HidePanel();
+            resultPanel.HidePanel();
         }
 
 
@@ -90,26 +102,12 @@ namespace MainUI
         }
 
         /// <summary>
-        /// ゲームのステージなどのロードが始まったときに呼ばれて、LoadingPanelを表示   
-        /// GameStateがPlayingになった際にロード画面を非表示にする
-        /// </summary>
-        internal IEnumerator ShowLoadingAtLoadGame()
-        {
-            loadingPanel.ShowPanel(1f);
-            while(gameManager.StageObjectsController == null)
-            {
-                yield return null;
-            }
-            startPanel.HidePanel();
-            resultPanel.HidePanel();
-        }
-
-        /// <summary>
         /// メインメッセージパネルを表示する
         /// </summary>
         /// <returns></returns>
         internal void ShowMessagesPanel()
         {
+            // メッセージが存在しない場合表示を行わずにcloseイベントを発生させる
             if (messagePanel.DoesMessageExist)
             {
                 messagePanel.ShowPanel();
@@ -117,28 +115,28 @@ namespace MainUI
             }
             else
             {
-                gameManager.OnMessagePanelClosed();
+                onUIPanelClosedHandler?.Invoke(this, new OnUIPanelClosedEventArgs(UIPanelType.Message));
+                loadingPanel.HidePanel(true);
             }
-            
         }
 
         /// <summary>
         /// リザルト画面が表示される Gamemanagerから呼ばれる
         /// </summary>
-        public IEnumerator ShowResultPanel(string doneStageID, bool doesWin)
+        public IEnumerator ShowResultPanel(string doneStageID, GameResultType gameResultType)
         {
             const float duration = 0.5f;
             loadingPanel.ShowPanel(duration);
             yield return new WaitForSeconds(duration);
-            resultPanel.ShowPanel(doneStageID, doesWin);
+            resultPanel.ShowPanel(doneStageID, gameResultType);
             resultPanel.retryButton.onClick.RemoveAllListeners();
             resultPanel.retryButton.onClick.AddListener(() =>
             {
-                LoadStage(doneStageID);
+                StartCoroutine(LoadStage(doneStageID));
             });
             loadingPanel.HidePanel(true);
 
-            if (doesWin)
+            if (gameResultType == GameResultType.Win)
             {
                 cameraUserController.SetFreeCameraMode(messageVirtualCamera);
             }
@@ -150,20 +148,20 @@ namespace MainUI
         }
 
         /// <summary>
-        /// MessagePanelが終了
+        /// MessagePanelが終了した際にMessagePanelより呼ばれる
         /// </summary>
-        public void OnMessagePanelClosed()
+        internal void OnMessagePanelClosed()
         {
-            static IEnumerator Show()
+            static IEnumerator DisableCursorDelay()
             {
                 yield return new WaitForSeconds(1f);
                 UserController.enableCursor = false;
             }
-
-            StartCoroutine(Show());
-
+            onUIPanelClosedHandler?.Invoke(this, new OnUIPanelClosedEventArgs(UIPanelType.Message));
+            
+            StartCoroutine(DisableCursorDelay());
             StartCoroutine( loadingPanel.ShowPanelForSeconds(1.5f));
         }
-    }
 
+    }
 }

@@ -5158,6 +5158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bff52106f6d0bb459b41a59a95f0674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainUIController: {fileID: 476731419}
   messageText: {fileID: 1339112279}
   overlayButton: {fileID: 2100302055}
   messageContainerList:
@@ -6525,6 +6526,7 @@ GameObject:
   - component: {fileID: 1994754827}
   - component: {fileID: 1994754826}
   - component: {fileID: 1994754828}
+  - component: {fileID: 1994754829}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6544,8 +6546,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2844ea7b390448a4ebc21dfcfe8ab0f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainUIController: {fileID: 476731419}
-  allUnitsController: {fileID: 1495560861}
 --- !u!4 &1994754827
 Transform:
   m_ObjectHideFlags: 0
@@ -6573,6 +6573,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa780d7850a212046950ca243a873f98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1994754829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1994754825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c50cffb64e39794dbe818188f9c5d82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainUIController: {fileID: 476731419}
+  allUnitsController: {fileID: 1495560861}
 --- !u!1 &2000547351 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6096340564189444948, guid: 451987f07610db04493497c5d7cfbdfa,

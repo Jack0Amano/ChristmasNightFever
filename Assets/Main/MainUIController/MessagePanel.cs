@@ -10,7 +10,10 @@ namespace MainUI
 {
     public class MessagePanel : MonoBehaviour
     {
-      
+
+        [Tooltip("親となるMainUIControllerを設定する")]
+        [SerializeField] MainUIController mainUIController;
+
         [SerializeField] TextMeshProUGUI messageText;
         [Tooltip("画面全体を覆うボタン これでコンテナのMessageを次に送る")]
         [SerializeField] public Button overlayButton;
@@ -79,7 +82,7 @@ namespace MainUI
             }
             else
             {
-                GameManager.Instance.OnMessagePanelClosed();
+                mainUIController.OnMessagePanelClosed();
                 gameObject.SetActive(false);
                 
             }
@@ -94,7 +97,7 @@ namespace MainUI
         {
             if (messageContainerList == null || messageContainerList.Count == 0)
             {
-                GameManager.Instance.OnMessagePanelClosed();
+                mainUIController.OnMessagePanelClosed();
                 gameObject.SetActive(false);
                 return;
             }

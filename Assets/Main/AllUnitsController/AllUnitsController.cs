@@ -1,4 +1,5 @@
 using StageObjects;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,12 +33,19 @@ namespace Units
         /// </summary>
         public List<UnitController> EnemyUnitControllers { get; private set; }　= new List<UnitController>();
 
-        GameManager gameManager;
+        /// <summary>
+        /// Unitの読み込みと設置が終わった際に呼び出すAction
+        /// </summary>
+        public Action onUnitsLoadedAction;
+
+        /// <summary>
+        /// ゲームが終了した際に呼び出すHandler
+        /// </summary>
+        public EventHandler<OnGameResultEventArgs> onGameResultEventHandler;
 
         // Start is called before the first frame update
         void Start()
         {
-            gameManager = GameManager.Instance;
         }
 
         // Update is called once per frame
@@ -76,7 +84,7 @@ namespace Units
                 // Player Unitの設置をStageObjectControllerのチェックポイントから取得
                 var spawnCorutines = stageObjectsController.EnemyWays.ConvertAll(way =>
                 {
-                    var enemyID = enemyUnitIDList[Random.Range(0, enemyUnitIDList.Count)];
+                    var enemyID = enemyUnitIDList[UnityEngine.Random.Range(0, enemyUnitIDList.Count)];
                     return StartCoroutine(this.SpawnUnit(way.pointAndStops[0].pointTransform, enemyID, UnitType.Enemy, way.pointsParent.name, way.pointAndStops));
                 });
                 spawnCorutines.Add(StartCoroutine(this.SpawnUnit(stageObjectsController.PlayerSpawnPoint.transform, playerUnitID, UnitType.Player, "Player")));
@@ -137,7 +145,7 @@ namespace Units
                 return;
             }
 
-            gameManager.OnUnitsLoaded();
+            onUnitsLoadedAction?.Invoke();
         }
 
         /// <summary>
@@ -147,17 +155,14 @@ namespace Units
         {
             IEnumerator _OnDelayActions()
             {
-
-               yield return new WaitForSeconds(0.5f);
+                StartCoroutine(cameraUserController.SetAsFollowTarget(PlayerUnitController.TPSController));
+                yield return new WaitForSeconds(1f);
                 // CameraUserControllerにPlayerのTPSConを渡して、これにカメラをFollowさせる
                 PlayerUnitController.TPSController.IsTPSControllActive = true;
-                StartCoroutine(cameraUserController.SetAsFollowTarget(PlayerUnitController.TPSController));
-
                 PlayerUnitController.StartGame();
                 EnemyUnitControllers.ForEach(enemy => enemy.StartGame());
             }
             StartCoroutine(_OnDelayActions());
-
         }
 
 
@@ -232,7 +237,7 @@ namespace Units
                 var unitController = sender as UnitController;
                 if (unitController.unitType == UnitType.Player)
                 {
-                    gameManager.OnGameResult(false);
+                    onGameResultEventHandler?.Invoke(this, new OnGameResultEventArgs(GameResultType.Lose));
                     RemoveAllUnits();
                 }
             }
@@ -272,7 +277,7 @@ namespace Units
                 PlayerUnitController.FinishToGameAsWin(cameraUserController, stageObjCon.winVirtualCamera);
 
                 yield return new WaitForSeconds(4.0f);
-                gameManager.OnGameResult(true);
+                onGameResultEventHandler?.Invoke(this, new OnGameResultEventArgs(GameResultType.Win));
                 RemoveAllUnits();
             }
         }

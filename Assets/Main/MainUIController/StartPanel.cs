@@ -32,7 +32,7 @@ namespace MainUI
 
             exitButton.onClick.AddListener(() =>
             {
-                GameManager.Instance.EndGame();
+                MainGame.GameManager.Instance.EndGame();
             });
             stageButtons.ForEach(b =>
             {

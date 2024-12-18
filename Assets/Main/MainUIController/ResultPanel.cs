@@ -25,7 +25,7 @@ namespace MainUI
             backgroundImage = GetComponent<Image>();
             exitButton.onClick.AddListener(() =>
             {
-                GameManager.Instance.EndGame();
+                MainGame.GameManager.Instance.EndGame();
             });
             resultLabel.text = "";
         }
@@ -45,15 +45,15 @@ namespace MainUI
         /// <summary>
         /// パネルを表示する ゲームが終わるときのアニメーションのため、エモい感じのアニメーションを利用する
         /// </summary>
-        internal void ShowPanel(string stageID, bool doesWin)
+        internal void ShowPanel(string stageID, GameResultType gameResultType)
         {
             gameObject.SetActive(true);
-            if (doesWin)
+            if (gameResultType == GameResultType.Win)
             {
                 resultLabel.text = "勝利";
                 backgroundImage.DOColor(Color.green, 1);
             }
-            else
+            else if (gameResultType == GameResultType.Lose)
             {
                 resultLabel.text = "負け";
                 backgroundImage.DOColor(Color.red, 1);

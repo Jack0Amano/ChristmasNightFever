@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
   <diagram name="ページ1" id="IcnlXymfl3ra3HIMCKri">
-    <mxGraphModel dx="2206" dy="1288" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1920" math="0" shadow="0">
+    <mxGraphModel dx="2887" dy="985" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1920" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -46,7 +46,7 @@
         <mxCell id="GcIDJ9KaJ4bPvR8jILLQ-98" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="GcIDJ9KaJ4bPvR8jILLQ-7" target="GcIDJ9KaJ4bPvR8jILLQ-79" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GcIDJ9KaJ4bPvR8jILLQ-7" value="&lt;h2&gt;GameManager&lt;/h2&gt;" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+        <mxCell id="GcIDJ9KaJ4bPvR8jILLQ-7" value="&lt;h2&gt;GameStream&lt;/h2&gt;" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="75" y="735" width="195" height="95" as="geometry" />
         </mxCell>
         <mxCell id="GcIDJ9KaJ4bPvR8jILLQ-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="GcIDJ9KaJ4bPvR8jILLQ-9" target="GcIDJ9KaJ4bPvR8jILLQ-40" edge="1">
@@ -1163,8 +1163,26 @@
         <mxCell id="jXujLD4FF0cwBqFkgT6Y-160" value="detectUnitTickが0.3秒で回っているから3" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="1660" y="6648" width="240" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="Kx4rB37h1MTgdZVI0HEZ-1" value="FO = FindOutLevel (発見度合い 1になったらゲームオーバー)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="Kx4rB37h1MTgdZVI0HEZ-1" value="FO = FindOutLevel (発見度合い 1になったらゲームオーバー)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="1372.5" y="5240" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="XSLvDhaF9kHT8em6MvAJ-2" value="&lt;h2&gt;GameManager&lt;/h2&gt;" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-290" y="735" width="195" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="XSLvDhaF9kHT8em6MvAJ-3" value="GameManagerの関数やプロパティは最低限に留める" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="-347.5" y="680" width="310" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="XSLvDhaF9kHT8em6MvAJ-4" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-20" y="2110" as="sourcePoint" />
+            <mxPoint x="-30" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XSLvDhaF9kHT8em6MvAJ-6" value="&lt;h4&gt;&lt;span style=&quot;font-weight: normal;&quot;&gt;GameStreamへの下流からの通知は全てDelegateもしくはeventを利用する&lt;br&gt;&lt;/span&gt;&lt;/h4&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="-175" y="590" width="420" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XSLvDhaF9kHT8em6MvAJ-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.434;entryY=0.05;entryDx=0;entryDy=0;entryPerimeter=0;shape=link;" edge="1" parent="1" source="XSLvDhaF9kHT8em6MvAJ-6" target="GcIDJ9KaJ4bPvR8jILLQ-7">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

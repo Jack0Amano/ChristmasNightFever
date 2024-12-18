@@ -1,3 +1,4 @@
+using MainGame;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -101,6 +102,13 @@ namespace Units.AI
             }
         }
 
+        GameManager gameManager;
+
+        private void Awake()
+        {
+            gameManager = GameManager.Instance;
+        }
+
         // Start is called before the first frame update
         void Start()
         {
@@ -115,7 +123,7 @@ namespace Units.AI
 
         private void FixedUpdate()
         {
-            if (GameManager.Instance.CurrentGameState != GameState.Playing)
+            if (gameManager.CurrentGameState != GameState.Playing)
                 return;
 
             if (moveState == EnemyAIMoveState.Finish || IsPause)
